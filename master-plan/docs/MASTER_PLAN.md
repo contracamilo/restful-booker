@@ -84,10 +84,10 @@ Formato: Impacto (1–5) × Probabilidad (1–5) = Nivel (IxP). Alto: 15–25, M
 ## 4. Trazabilidad mínima (RTM)
 
 - **Req/Historia 1:** Autenticación de usuario admin (RQ1)
-  - Caso(s): T-AUTH-01, T-AUTH-02 • Criterio(s): token válido solo con credenciales correctas • Severidad: Crítico • Estado: Pendiente de ejecución manual
+  - Caso(s): T-AUTH-01, T-AUTH-02 • Criterio(s): token válido solo con credenciales correctas • Severidad: Crítico • Estado: **Ejecutado — PASA**: credenciales correctas devuelven `{"token":"..."}` ([evidencia](../evidencias/riesgos/RQ1_auth_valid.txt)); incorrectas devuelven `{"reason":"Bad credentials"}` sin token ([evidencia](../evidencias/riesgos/RQ1_auth_invalid.txt)). *Observación menor (no defecto):* ambas respuestas usan HTTP 200 en vez de 401 para el caso fallido — el control funciona (no emite token), pero el código de estado no es semánticamente correcto.
 
 - **Req/Historia 2:** Consultar disponibilidad/listado de reservas (RQ2)
-  - Caso(s): T-GET-01, T-GET-02 • Criterio(s): `GET /booking` filtra por firstname/lastname/checkin/checkout • Severidad: Alto • Estado: Pendiente de ejecución manual
+  - Caso(s): T-GET-01, T-GET-02 • Criterio(s): `GET /booking` filtra por firstname/lastname/checkin/checkout • Severidad: Alto • Estado: **Ejecutado — PASA**: listado completo ([evidencia](../evidencias/riesgos/RQ2_get_all.txt)) y filtro por `firstname` devuelve exactamente la reserva esperada ([evidencia](../evidencias/riesgos/RQ2_get_filtered.txt))
 
 - **Req/Historia 3:** Crear una reserva válida (RQ3)
   - Caso(s): Escenario Cucumber "Crear una reserva válida" • Criterio(s): respuesta 200 con bookingid numérico y datos reflejados • Severidad: Crítico • Estado: **Automatizado — PASA** (ver sección 9)
@@ -150,9 +150,9 @@ RTM también se publica como lista independiente en [`master-plan/evidencias/RTM
 
 ## 8. Métricas (mínimas)
 
-- [x] **% avance de ejecución de casos** (hechos/plan) — **9 de 11 casos ejecutados y documentados (82%)** al cierre de este ciclo (T01–T06, RQ3–RQ5; pendientes: RQ1, RQ2 — autenticación y listado, no cubiertos por el foco en riesgos de escritura). Frecuencia: por ciclo (sección 6).
+- [x] **% avance de ejecución de casos** (hechos/plan) — **11 de 11 casos ejecutados y documentados (100%)** al cierre de este ciclo (T01–T06, RQ1–RQ5). Frecuencia: por ciclo (sección 6).
 - [x] **# defectos abiertos por severidad** — **Crítico: 2** (DEF-01, DEF-04) · **Medio: 2** (DEF-02, DEF-03) · Alto/Bajo: 0. Frecuencia: al cierre de cada ciclo. *Decisión que informa:* con 2 defectos críticos abiertos ligados a integridad de datos y autorización, se prioriza su corrección/documentación formal antes de ampliar cobertura funcional.
-- [x] **Tasa de éxito del smoke** (últimos N builds) — pipeline CI: **1/1 ejecuciones en verde** ([run #32411628327](https://github.com/contracamilo/restful-booker/actions/runs/32411628327)). *Nota aparte:* de los 8 casos de riesgo con veredicto concluyente (T01–T05, RQ3–RQ5), solo 1 confirma comportamiento correcto (12.5%) — esto no es una falla del smoke suite (que sigue en verde por diseño, sección 9), sino una señal de negocio: la API bajo prueba tiene múltiples reglas de negocio sin implementar, justificando la prioridad Alta asignada a R1–R3. Frecuencia: por cada push/PR.
+- [x] **Tasa de éxito del smoke** (últimos N builds) — pipeline CI: **1/1 ejecuciones en verde** ([run #32411628327](https://github.com/contracamilo/restful-booker/actions/runs/32411628327)). *Nota aparte:* de los 10 casos de riesgo con veredicto concluyente (T01–T05, RQ1–RQ5), 3 confirman comportamiento correcto (RQ1, RQ2, RQ3 = 30%) y 5 confirman defectos (T01, T03, T04, T05, y el DEF-01 automatizado) — esto no es una falla del smoke suite (que sigue en verde por diseño, sección 9), sino una señal de negocio: la API bajo prueba tiene varias reglas de negocio críticas sin implementar (fechas, autorización), justificando la prioridad Alta asignada a R1–R3. Frecuencia: por cada push/PR.
 
 ---
 

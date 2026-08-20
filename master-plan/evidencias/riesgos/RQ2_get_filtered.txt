@@ -1,0 +1,11 @@
+=== RQ2c: GET /booking?firstname=FiltroQA ===
+HTTP/1.1 200 OK
+X-Powered-By: Express
+Content-Type: application/json; charset=utf-8
+Content-Length: 18
+ETag: W/"12-syWDNKoCjO2b3ztf5dcxujay3bs"
+Date: Thu, 20 Aug 2026 21:08:44 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+[{"bookingid":11}]

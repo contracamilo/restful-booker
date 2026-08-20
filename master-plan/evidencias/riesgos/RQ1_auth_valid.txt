@@ -1,0 +1,11 @@
+=== RQ1a: POST /auth con credenciales correctas ===
+HTTP/1.1 200 OK
+X-Powered-By: Express
+Content-Type: application/json; charset=utf-8
+Content-Length: 27
+ETag: W/"1b-rJGtYTbyEwhN7bM7c98CiS+h6ck"
+Date: Thu, 20 Aug 2026 21:08:44 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+{"token":"67b8dc237622b7c"}

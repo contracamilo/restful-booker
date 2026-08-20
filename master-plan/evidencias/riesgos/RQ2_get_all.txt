@@ -1,0 +1,11 @@
+=== RQ2a: GET /booking sin filtros ===
+HTTP/1.1 200 OK
+X-Powered-By: Express
+Content-Type: application/json; charset=utf-8
+Content-Length: 162
+ETag: W/"a2-McmYuBSjSdokYsKxUBkW/UjwHjY"
+Date: Thu, 20 Aug 2026 21:08:44 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+[{"bookingid":1},{"bookingid":2},{"bookingid":3},{"bookingid":4},{"bookingid":5},{"bookingid":6},{"bookingid":7},{"bookingid":8},{"bookingid":9},{"bookingid":10}]
