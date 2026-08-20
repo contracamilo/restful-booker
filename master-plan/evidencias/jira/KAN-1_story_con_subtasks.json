@@ -1,0 +1,412 @@
+{
+    "expand": "renderedFields,names,schema,operations,editmeta,changelog,versionedRepresentations",
+    "id": "10042",
+    "self": "https://unisalle-team-kku47wgx.atlassian.net/rest/api/3/issue/10042",
+    "key": "KAN-1",
+    "fields": {
+        "summary": "Master Test Plan - Restful Booker (Actividad 2)",
+        "issuetype": {
+            "self": "https://unisalle-team-kku47wgx.atlassian.net/rest/api/3/issuetype/10009",
+            "id": "10009",
+            "description": "Stories track functionality or features expressed as user goals.",
+            "iconUrl": "https://unisalle-team-kku47wgx.atlassian.net/rest/api/2/universal_avatar/view/type/issuetype/avatar/10315?size=medium",
+            "name": "Story",
+            "subtask": false,
+            "avatarId": 10315,
+            "entityId": "9bfaf2a4-0c4e-4ca0-9a05-3cb637873d46",
+            "hierarchyLevel": 0
+        },
+        "subtasks": [
+            {
+                "id": "10053",
+                "key": "KAN-2",
+                "self": "https://unisalle-team-kku47wgx.atlassian.net/rest/api/3/issue/10053",
+                "fields": {
+                    "summary": "T01 - Validar que checkout sea posterior a checkin",
+                    "status": {
+                        "self": "https://unisalle-team-kku47wgx.atlassian.net/rest/api/3/status/10004",
+                        "description": "",
+                        "iconUrl": "https://unisalle-team-kku47wgx.atlassian.net/images/icons/statuses/generic.png",
+                        "name": "To Do",
+                        "id": "10004",
+                        "statusCategory": {
+                            "self": "https://unisalle-team-kku47wgx.atlassian.net/rest/api/3/statuscategory/2",
+                            "id": 2,
+                            "key": "new",
+                            "colorName": "blue-gray",
+                            "name": "To Do"
+                        }
+                    },
+                    "priority": {
+                        "self": "https://unisalle-team-kku47wgx.atlassian.net/rest/api/3/priority/3",
+                        "iconUrl": "https://unisalle-team-kku47wgx.atlassian.net/images/icons/priorities/medium_new.svg",
+                        "name": "Medium",
+                        "id": "3"
+                    },
+                    "issuetype": {
+                        "self": "https://unisalle-team-kku47wgx.atlassian.net/rest/api/3/issuetype/10007",
+                        "id": "10007",
+                        "description": "Subtasks track small pieces of work that are part of a larger task.",
+                        "iconUrl": "https://unisalle-team-kku47wgx.atlassian.net/rest/api/2/universal_avatar/view/type/issuetype/avatar/10316?size=medium",
+                        "name": "Subtask",
+                        "subtask": true,
+                        "avatarId": 10316,
+                        "entityId": "c807e62b-99c6-437a-999b-6e5bc60712fe",
+                        "hierarchyLevel": -1
+                    }
+                }
+            },
+            {
+                "id": "10054",
+                "key": "KAN-3",
+                "self": "https://unisalle-team-kku47wgx.atlassian.net/rest/api/3/issue/10054",
+                "fields": {
+                    "summary": "T02 - Prevenir reservas solapadas (automatizado, Cucumber DEF-01)",
+                    "status": {
+                        "self": "https://unisalle-team-kku47wgx.atlassian.net/rest/api/3/status/10004",
+                        "description": "",
+                        "iconUrl": "https://unisalle-team-kku47wgx.atlassian.net/images/icons/statuses/generic.png",
+                        "name": "To Do",
+                        "id": "10004",
+                        "statusCategory": {
+                            "self": "https://unisalle-team-kku47wgx.atlassian.net/rest/api/3/statuscategory/2",
+                            "id": 2,
+                            "key": "new",
+                            "colorName": "blue-gray",
+                            "name": "To Do"
+                        }
+                    },
+                    "priority": {
+                        "self": "https://unisalle-team-kku47wgx.atlassian.net/rest/api/3/priority/3",
+                        "iconUrl": "https://unisalle-team-kku47wgx.atlassian.net/images/icons/priorities/medium_new.svg",
+                        "name": "Medium",
+                        "id": "3"
+                    },
+                    "issuetype": {
+                        "self": "https://unisalle-team-kku47wgx.atlassian.net/rest/api/3/issuetype/10007",
+                        "id": "10007",
+                        "description": "Subtasks track small pieces of work that are part of a larger task.",
+                        "iconUrl": "https://unisalle-team-kku47wgx.atlassian.net/rest/api/2/universal_avatar/view/type/issuetype/avatar/10316?size=medium",
+                        "name": "Subtask",
+                        "subtask": true,
+                        "avatarId": 10316,
+                        "entityId": "c807e62b-99c6-437a-999b-6e5bc60712fe",
+                        "hierarchyLevel": -1
+                    }
+                }
+            },
+            {
+                "id": "10055",
+                "key": "KAN-4",
+                "self": "https://unisalle-team-kku47wgx.atlassian.net/rest/api/3/issue/10055",
+                "fields": {
+                    "summary": "T03 - Validar autorizacion real en PUT/DELETE (no solo header hardcodeado)",
+                    "status": {
+                        "self": "https://unisalle-team-kku47wgx.atlassian.net/rest/api/3/status/10004",
+                        "description": "",
+                        "iconUrl": "https://unisalle-team-kku47wgx.atlassian.net/images/icons/statuses/generic.png",
+                        "name": "To Do",
+                        "id": "10004",
+                        "statusCategory": {
+                            "self": "https://unisalle-team-kku47wgx.atlassian.net/rest/api/3/statuscategory/2",
+                            "id": 2,
+                            "key": "new",
+                            "colorName": "blue-gray",
+                            "name": "To Do"
+                        }
+                    },
+                    "priority": {
+                        "self": "https://unisalle-team-kku47wgx.atlassian.net/rest/api/3/priority/3",
+                        "iconUrl": "https://unisalle-team-kku47wgx.atlassian.net/images/icons/priorities/medium_new.svg",
+                        "name": "Medium",
+                        "id": "3"
+                    },
+                    "issuetype": {
+                        "self": "https://unisalle-team-kku47wgx.atlassian.net/rest/api/3/issuetype/10007",
+                        "id": "10007",
+                        "description": "Subtasks track small pieces of work that are part of a larger task.",
+                        "iconUrl": "https://unisalle-team-kku47wgx.atlassian.net/rest/api/2/universal_avatar/view/type/issuetype/avatar/10316?size=medium",
+                        "name": "Subtask",
+                        "subtask": true,
+                        "avatarId": 10316,
+                        "entityId": "c807e62b-99c6-437a-999b-6e5bc60712fe",
+                        "hierarchyLevel": -1
+                    }
+                }
+            },
+            {
+                "id": "10056",
+                "key": "KAN-5",
+                "self": "https://unisalle-team-kku47wgx.atlassian.net/rest/api/3/issue/10056",
+                "fields": {
+                    "summary": "T04a - Rechazar totalprice negativo",
+                    "status": {
+                        "self": "https://unisalle-team-kku47wgx.atlassian.net/rest/api/3/status/10004",
+                        "description": "",
+                        "iconUrl": "https://unisalle-team-kku47wgx.atlassian.net/images/icons/statuses/generic.png",
+                        "name": "To Do",
+                        "id": "10004",
+                        "statusCategory": {
+                            "self": "https://unisalle-team-kku47wgx.atlassian.net/rest/api/3/statuscategory/2",
+                            "id": 2,
+                            "key": "new",
+                            "colorName": "blue-gray",
+                            "name": "To Do"
+                        }
+                    },
+                    "priority": {
+                        "self": "https://unisalle-team-kku47wgx.atlassian.net/rest/api/3/priority/3",
+                        "iconUrl": "https://unisalle-team-kku47wgx.atlassian.net/images/icons/priorities/medium_new.svg",
+                        "name": "Medium",
+                        "id": "3"
+                    },
+                    "issuetype": {
+                        "self": "https://unisalle-team-kku47wgx.atlassian.net/rest/api/3/issuetype/10007",
+                        "id": "10007",
+                        "description": "Subtasks track small pieces of work that are part of a larger task.",
+                        "iconUrl": "https://unisalle-team-kku47wgx.atlassian.net/rest/api/2/universal_avatar/view/type/issuetype/avatar/10316?size=medium",
+                        "name": "Subtask",
+                        "subtask": true,
+                        "avatarId": 10316,
+                        "entityId": "c807e62b-99c6-437a-999b-6e5bc60712fe",
+                        "hierarchyLevel": -1
+                    }
+                }
+            },
+            {
+                "id": "10057",
+                "key": "KAN-6",
+                "self": "https://unisalle-team-kku47wgx.atlassian.net/rest/api/3/issue/10057",
+                "fields": {
+                    "summary": "T04b - Rechazar totalprice no numerico",
+                    "status": {
+                        "self": "https://unisalle-team-kku47wgx.atlassian.net/rest/api/3/status/10004",
+                        "description": "",
+                        "iconUrl": "https://unisalle-team-kku47wgx.atlassian.net/images/icons/statuses/generic.png",
+                        "name": "To Do",
+                        "id": "10004",
+                        "statusCategory": {
+                            "self": "https://unisalle-team-kku47wgx.atlassian.net/rest/api/3/statuscategory/2",
+                            "id": 2,
+                            "key": "new",
+                            "colorName": "blue-gray",
+                            "name": "To Do"
+                        }
+                    },
+                    "priority": {
+                        "self": "https://unisalle-team-kku47wgx.atlassian.net/rest/api/3/priority/3",
+                        "iconUrl": "https://unisalle-team-kku47wgx.atlassian.net/images/icons/priorities/medium_new.svg",
+                        "name": "Medium",
+                        "id": "3"
+                    },
+                    "issuetype": {
+                        "self": "https://unisalle-team-kku47wgx.atlassian.net/rest/api/3/issuetype/10007",
+                        "id": "10007",
+                        "description": "Subtasks track small pieces of work that are part of a larger task.",
+                        "iconUrl": "https://unisalle-team-kku47wgx.atlassian.net/rest/api/2/universal_avatar/view/type/issuetype/avatar/10316?size=medium",
+                        "name": "Subtask",
+                        "subtask": true,
+                        "avatarId": 10316,
+                        "entityId": "c807e62b-99c6-437a-999b-6e5bc60712fe",
+                        "hierarchyLevel": -1
+                    }
+                }
+            },
+            {
+                "id": "10058",
+                "key": "KAN-7",
+                "self": "https://unisalle-team-kku47wgx.atlassian.net/rest/api/3/issue/10058",
+                "fields": {
+                    "summary": "T05 - DELETE sobre id inexistente debe responder 404",
+                    "status": {
+                        "self": "https://unisalle-team-kku47wgx.atlassian.net/rest/api/3/status/10004",
+                        "description": "",
+                        "iconUrl": "https://unisalle-team-kku47wgx.atlassian.net/images/icons/statuses/generic.png",
+                        "name": "To Do",
+                        "id": "10004",
+                        "statusCategory": {
+                            "self": "https://unisalle-team-kku47wgx.atlassian.net/rest/api/3/statuscategory/2",
+                            "id": 2,
+                            "key": "new",
+                            "colorName": "blue-gray",
+                            "name": "To Do"
+                        }
+                    },
+                    "priority": {
+                        "self": "https://unisalle-team-kku47wgx.atlassian.net/rest/api/3/priority/3",
+                        "iconUrl": "https://unisalle-team-kku47wgx.atlassian.net/images/icons/priorities/medium_new.svg",
+                        "name": "Medium",
+                        "id": "3"
+                    },
+                    "issuetype": {
+                        "self": "https://unisalle-team-kku47wgx.atlassian.net/rest/api/3/issuetype/10007",
+                        "id": "10007",
+                        "description": "Subtasks track small pieces of work that are part of a larger task.",
+                        "iconUrl": "https://unisalle-team-kku47wgx.atlassian.net/rest/api/2/universal_avatar/view/type/issuetype/avatar/10316?size=medium",
+                        "name": "Subtask",
+                        "subtask": true,
+                        "avatarId": 10316,
+                        "entityId": "c807e62b-99c6-437a-999b-6e5bc60712fe",
+                        "hierarchyLevel": -1
+                    }
+                }
+            },
+            {
+                "id": "10059",
+                "key": "KAN-8",
+                "self": "https://unisalle-team-kku47wgx.atlassian.net/rest/api/3/issue/10059",
+                "fields": {
+                    "summary": "T06 - Verificar expiracion de tokens de autenticacion",
+                    "status": {
+                        "self": "https://unisalle-team-kku47wgx.atlassian.net/rest/api/3/status/10004",
+                        "description": "",
+                        "iconUrl": "https://unisalle-team-kku47wgx.atlassian.net/images/icons/statuses/generic.png",
+                        "name": "To Do",
+                        "id": "10004",
+                        "statusCategory": {
+                            "self": "https://unisalle-team-kku47wgx.atlassian.net/rest/api/3/statuscategory/2",
+                            "id": 2,
+                            "key": "new",
+                            "colorName": "blue-gray",
+                            "name": "To Do"
+                        }
+                    },
+                    "priority": {
+                        "self": "https://unisalle-team-kku47wgx.atlassian.net/rest/api/3/priority/3",
+                        "iconUrl": "https://unisalle-team-kku47wgx.atlassian.net/images/icons/priorities/medium_new.svg",
+                        "name": "Medium",
+                        "id": "3"
+                    },
+                    "issuetype": {
+                        "self": "https://unisalle-team-kku47wgx.atlassian.net/rest/api/3/issuetype/10007",
+                        "id": "10007",
+                        "description": "Subtasks track small pieces of work that are part of a larger task.",
+                        "iconUrl": "https://unisalle-team-kku47wgx.atlassian.net/rest/api/2/universal_avatar/view/type/issuetype/avatar/10316?size=medium",
+                        "name": "Subtask",
+                        "subtask": true,
+                        "avatarId": 10316,
+                        "entityId": "c807e62b-99c6-437a-999b-6e5bc60712fe",
+                        "hierarchyLevel": -1
+                    }
+                }
+            },
+            {
+                "id": "10060",
+                "key": "KAN-9",
+                "self": "https://unisalle-team-kku47wgx.atlassian.net/rest/api/3/issue/10060",
+                "fields": {
+                    "summary": "RQ1 - Autenticacion valida/invalida via POST /auth",
+                    "status": {
+                        "self": "https://unisalle-team-kku47wgx.atlassian.net/rest/api/3/status/10004",
+                        "description": "",
+                        "iconUrl": "https://unisalle-team-kku47wgx.atlassian.net/images/icons/statuses/generic.png",
+                        "name": "To Do",
+                        "id": "10004",
+                        "statusCategory": {
+                            "self": "https://unisalle-team-kku47wgx.atlassian.net/rest/api/3/statuscategory/2",
+                            "id": 2,
+                            "key": "new",
+                            "colorName": "blue-gray",
+                            "name": "To Do"
+                        }
+                    },
+                    "priority": {
+                        "self": "https://unisalle-team-kku47wgx.atlassian.net/rest/api/3/priority/3",
+                        "iconUrl": "https://unisalle-team-kku47wgx.atlassian.net/images/icons/priorities/medium_new.svg",
+                        "name": "Medium",
+                        "id": "3"
+                    },
+                    "issuetype": {
+                        "self": "https://unisalle-team-kku47wgx.atlassian.net/rest/api/3/issuetype/10007",
+                        "id": "10007",
+                        "description": "Subtasks track small pieces of work that are part of a larger task.",
+                        "iconUrl": "https://unisalle-team-kku47wgx.atlassian.net/rest/api/2/universal_avatar/view/type/issuetype/avatar/10316?size=medium",
+                        "name": "Subtask",
+                        "subtask": true,
+                        "avatarId": 10316,
+                        "entityId": "c807e62b-99c6-437a-999b-6e5bc60712fe",
+                        "hierarchyLevel": -1
+                    }
+                }
+            },
+            {
+                "id": "10061",
+                "key": "KAN-10",
+                "self": "https://unisalle-team-kku47wgx.atlassian.net/rest/api/3/issue/10061",
+                "fields": {
+                    "summary": "RQ2 - Filtrado de GET /booking por firstname/lastname/checkin/checkout",
+                    "status": {
+                        "self": "https://unisalle-team-kku47wgx.atlassian.net/rest/api/3/status/10004",
+                        "description": "",
+                        "iconUrl": "https://unisalle-team-kku47wgx.atlassian.net/images/icons/statuses/generic.png",
+                        "name": "To Do",
+                        "id": "10004",
+                        "statusCategory": {
+                            "self": "https://unisalle-team-kku47wgx.atlassian.net/rest/api/3/statuscategory/2",
+                            "id": 2,
+                            "key": "new",
+                            "colorName": "blue-gray",
+                            "name": "To Do"
+                        }
+                    },
+                    "priority": {
+                        "self": "https://unisalle-team-kku47wgx.atlassian.net/rest/api/3/priority/3",
+                        "iconUrl": "https://unisalle-team-kku47wgx.atlassian.net/images/icons/priorities/medium_new.svg",
+                        "name": "Medium",
+                        "id": "3"
+                    },
+                    "issuetype": {
+                        "self": "https://unisalle-team-kku47wgx.atlassian.net/rest/api/3/issuetype/10007",
+                        "id": "10007",
+                        "description": "Subtasks track small pieces of work that are part of a larger task.",
+                        "iconUrl": "https://unisalle-team-kku47wgx.atlassian.net/rest/api/2/universal_avatar/view/type/issuetype/avatar/10316?size=medium",
+                        "name": "Subtask",
+                        "subtask": true,
+                        "avatarId": 10316,
+                        "entityId": "c807e62b-99c6-437a-999b-6e5bc60712fe",
+                        "hierarchyLevel": -1
+                    }
+                }
+            },
+            {
+                "id": "10062",
+                "key": "KAN-11",
+                "self": "https://unisalle-team-kku47wgx.atlassian.net/rest/api/3/issue/10062",
+                "fields": {
+                    "summary": "RQ3 - Crear reserva valida (automatizado, Cucumber - PASA)",
+                    "status": {
+                        "self": "https://unisalle-team-kku47wgx.atlassian.net/rest/api/3/status/10004",
+                        "description": "",
+                        "iconUrl": "https://unisalle-team-kku47wgx.atlassian.net/images/icons/statuses/generic.png",
+                        "name": "To Do",
+                        "id": "10004",
+                        "statusCategory": {
+                            "self": "https://unisalle-team-kku47wgx.atlassian.net/rest/api/3/statuscategory/2",
+                            "id": 2,
+                            "key": "new",
+                            "colorName": "blue-gray",
+                            "name": "To Do"
+                        }
+                    },
+                    "priority": {
+                        "self": "https://unisalle-team-kku47wgx.atlassian.net/rest/api/3/priority/3",
+                        "iconUrl": "https://unisalle-team-kku47wgx.atlassian.net/images/icons/priorities/medium_new.svg",
+                        "name": "Medium",
+                        "id": "3"
+                    },
+                    "issuetype": {
+                        "self": "https://unisalle-team-kku47wgx.atlassian.net/rest/api/3/issuetype/10007",
+                        "id": "10007",
+                        "description": "Subtasks track small pieces of work that are part of a larger task.",
+                        "iconUrl": "https://unisalle-team-kku47wgx.atlassian.net/rest/api/2/universal_avatar/view/type/issuetype/avatar/10316?size=medium",
+                        "name": "Subtask",
+                        "subtask": true,
+                        "avatarId": 10316,
+                        "entityId": "c807e62b-99c6-437a-999b-6e5bc60712fe",
+                        "hierarchyLevel": -1
+                    }
+                }
+            }
+        ]
+    }
+}

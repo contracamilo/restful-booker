@@ -11,6 +11,7 @@
 - **Versión del documento:** v0.1 (borrador — se etiqueta `v1.0` en el repo al cierre)
 - **Fecha:** _[completar fecha de entrega]_
 - **Repositorio (URL):** https://github.com/contracamilo/restful-booker
+- **Tablero Jira (opcional):** proyecto "Calidad en Software 2" (`KAN`) — historia [KAN-1](https://unisalle-team-kku47wgx.atlassian.net/browse/KAN-1) con 10 tareas (casos de prueba) y 5 bugs vinculados (`Blocks`), ver [`master-plan/evidencias/jira/`](../evidencias/jira)
 
 ---
 
