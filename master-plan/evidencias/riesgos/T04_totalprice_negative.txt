@@ -1,0 +1,11 @@
+=== T04a: R4 - totalprice negativo ===
+HTTP/1.1 200 OK
+X-Powered-By: Express
+Content-Type: application/json; charset=utf-8
+Content-Length: 191
+ETag: W/"bf-ATaOJhkZxs2CO2kFu+1ASk3A8OA"
+Date: Thu, 20 Aug 2026 20:01:10 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+{"bookingid":12,"booking":{"firstname":"Test","lastname":"R4neg","totalprice":-50,"depositpaid":true,"bookingdates":{"checkin":"2026-11-01","checkout":"2026-11-02"},"additionalneeds":"None"}}

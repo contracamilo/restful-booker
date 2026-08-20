@@ -1,0 +1,11 @@
+=== T01: R1 - checkout anterior a checkin ===
+HTTP/1.1 200 OK
+X-Powered-By: Express
+Content-Type: application/json; charset=utf-8
+Content-Length: 188
+ETag: W/"bc-8Wk+7riWxmiE64O8YaIgj+NVRmM"
+Date: Thu, 20 Aug 2026 20:01:00 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+{"bookingid":11,"booking":{"firstname":"Test","lastname":"R1","totalprice":100,"depositpaid":true,"bookingdates":{"checkin":"2026-09-10","checkout":"2026-09-01"},"additionalneeds":"None"}}

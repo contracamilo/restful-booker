@@ -35,15 +35,15 @@ Contrato de API documentado en `routes/index.js` del propio repositorio (fuente 
 
 Formato: Impacto (1–5) × Probabilidad (1–5) = Nivel (IxP). Alto: 15–25, Medio: 8–14, Bajo: 1–7.
 
-**R1.** Descripción: `POST /booking` no valida que `checkout` sea posterior a `checkin` → se crean reservas con fechas invertidas o idénticas. | Impacto: 5 Prob.: 4 Nivel (IxP): 20 (Alto) | Mitigación/Prueba: caso T01 — crear reserva con `checkout` anterior a `checkin` y verificar rechazo.
+**R1.** Descripción: `POST /booking` no valida que `checkout` sea posterior a `checkin` → se crean reservas con fechas invertidas o idénticas. | Impacto: 5 Prob.: 4 Nivel (IxP): 20 (Alto) | Mitigación/Prueba: caso T01 — crear reserva con `checkout` anterior a `checkin`. **Ejecutado:** respuesta `200 OK`, la reserva se crea con fechas invertidas (`bookingid: 11`) → defecto confirmado, ver evidencia [T01](../evidencias/riesgos/T01_checkout_antes_checkin.txt).
 
-**R2.** Descripción: no existe verificación de solapamiento entre reservas → dos reservas para el mismo rango de fechas se aceptan sin conflicto (doble reserva). | Impacto: 5 Prob.: 4 Nivel (IxP): 20 (Alto) | Mitigación/Prueba: caso T02, automatizado como DEF-01 en la suite Cucumber (ver sección 9).
+**R2.** Descripción: no existe verificación de solapamiento entre reservas → dos reservas para el mismo rango de fechas se aceptan sin conflicto (doble reserva). | Impacto: 5 Prob.: 4 Nivel (IxP): 20 (Alto) | Mitigación/Prueba: caso T02, automatizado como DEF-01 en la suite Cucumber. **Ejecutado (automatizado):** ambas reservas se crean con `bookingid` distintos → defecto confirmado (ver sección 9).
 
-**R3.** Descripción: `PUT/PATCH/DELETE /booking/:id` aceptan el header Basic hardcodeado (`YWRtaW46cGFzc3dvcmQxMjM=`) documentado públicamente → cualquiera con acceso al repo puede modificar/eliminar reservas ajenas sin pasar por `/auth`. | Impacto: 4 Prob.: 4 Nivel (IxP): 16 (Alto) | Mitigación/Prueba: caso T03 — usar el header sin haber llamado `/auth` y verificar que igual autoriza.
+**R3.** Descripción: `PUT/PATCH/DELETE /booking/:id` aceptan el header Basic hardcodeado (`YWRtaW46cGFzc3dvcmQxMjM=`) documentado públicamente → cualquiera con acceso al repo puede modificar/eliminar reservas ajenas sin pasar por `/auth`. | Impacto: 4 Prob.: 4 Nivel (IxP): 16 (Alto) | Mitigación/Prueba: caso T03 — usar el header sin haber llamado `/auth`. **Ejecutado:** `PUT /booking/1` con solo el header hardcodeado devuelve `200 OK` y modifica la reserva → defecto confirmado (DEF-04), ver evidencia [T03](../evidencias/riesgos/T03_auth_hardcoded.txt).
 
-**R4.** Descripción: `totalprice` solo valida presencia (`presence: true`), no tipo ni rango → se aceptan precios negativos, cero o no numéricos. | Impacto: 4 Prob.: 3 Nivel (IxP): 12 (Medio) | Mitigación/Prueba: caso T04 — partición de equivalencia sobre `totalprice` (ver sección 3.2).
+**R4.** Descripción: `totalprice` solo valida presencia (`presence: true`), no tipo ni rango → se aceptan precios negativos, cero o no numéricos. | Impacto: 4 Prob.: 3 Nivel (IxP): 12 (Medio) | Mitigación/Prueba: caso T04 — partición de equivalencia sobre `totalprice`. **Ejecutado:** `totalprice: -50` se acepta tal cual (`200 OK`, [evidencia](../evidencias/riesgos/T04_totalprice_negative.txt)); `totalprice: "abc"` es **coaccionado silenciosamente a `null`** en vez de rechazarse (`200 OK`, [evidencia](../evidencias/riesgos/T04_totalprice_string.txt)) — hallazgo más severo de lo previsto: no solo falta validación, se corrompe el dato silenciosamente (DEF-03).
 
-**R5.** Descripción: `DELETE /booking/:id` sobre un id inexistente responde `405` en lugar de `404` → clientes/automatización interpretan mal el resultado. | Impacto: 2 Prob.: 4 Nivel (IxP): 8 (Medio) | Mitigación/Prueba: caso T05 — `DELETE` sobre id inexistente, verificar código de estado.
+**R5.** Descripción: `DELETE /booking/:id` sobre un id inexistente responde `405` en lugar de `404` → clientes/automatización interpretan mal el resultado. | Impacto: 2 Prob.: 4 Nivel (IxP): 8 (Medio) | Mitigación/Prueba: caso T05 — `DELETE` sobre id inexistente. **Ejecutado:** respuesta `405 Method Not Allowed` confirmada, ver evidencia [T05](../evidencias/riesgos/T05_delete_nonexistent.txt) → defecto confirmado (DEF-02).
 
 **R6.** Descripción: el token emitido por `POST /auth` no expira ni se invalida (vive en memoria del proceso) → una fuga de token queda vigente indefinidamente hasta reiniciar el contenedor. | Impacto: 4 Prob.: 2 Nivel (IxP): 8 (Medio) | Mitigación/Prueba: caso T06 — documentado como no verificable en un entorno de un solo ambiente (ver sección 5); riesgo aceptado y registrado.
 
@@ -95,7 +95,7 @@ Formato: Impacto (1–5) × Probabilidad (1–5) = Nivel (IxP). Alto: 15–25, M
   - Caso(s): Escenario Cucumber "DEF-01" • Criterio(s): debería rechazar solapamiento (comportamiento deseado) • Severidad: Crítico • Estado: **Defecto confirmado (DEF-01)** — automatizado como prueba de caracterización que documenta el gap (ver sección 7)
 
 - **Req/Historia 5:** Actualizar/eliminar reserva solo con autorización (RQ5)
-  - Caso(s): T03 (R3), T-DELETE-01 • Criterio(s): operaciones de escritura devuelven 403 sin token válido • Severidad: Crítico • Estado: Pendiente de ejecución manual
+  - Caso(s): T03 (R3), T-DELETE-01 • Criterio(s): operaciones de escritura devuelven 403 sin token válido • Severidad: Crítico • Estado: **Falló — defecto confirmado (DEF-04)**, ver evidencia [T03](../evidencias/riesgos/T03_auth_hardcoded.txt)
 
 RTM también se publica como lista independiente en [`master-plan/evidencias/RTM.csv`](../evidencias/RTM.csv) para el entregable separado que exige la actividad.
 
@@ -136,9 +136,10 @@ RTM también se publica como lista independiente en [`master-plan/evidencias/RTM
 
 | ID | Descripción | Severidad | Prioridad | Estado | Reproducibilidad |
 |---|---|---|---|---|---|
-| DEF-01 | La API acepta reservas solapadas para el mismo rango de fechas sin ningún control (Riesgo R2) | Crítico | P1 | New — automatizado como prueba de caracterización (ver sección 9); no se corrige por ser fork de terceros usado como sandbox | Reproducible: ver escenario Cucumber "DEF-01" — cualquier integrante obtiene el mismo resultado ejecutando `mvn test` |
-| DEF-02 | `DELETE /booking/:id` sobre un id inexistente responde `405 Method Not Allowed` en vez de `404 Not Found` (Riesgo R5) | Medio | P2 | New | Reproducible: `curl -X DELETE http://localhost:3001/booking/999999 -H "Authorization: Basic YWRtaW46cGFzc3dvcmQxMjM="` |
-| DEF-03 | `totalprice` acepta valores negativos, cero y no numéricos sin rechazo (Riesgo R4) | Medio | P2 | New | Reproducible: `POST /booking` con `totalprice: -50` |
+| DEF-01 | La API acepta reservas solapadas para el mismo rango de fechas sin ningún control (Riesgo R2) | Crítico | P1 | New — automatizado como prueba de caracterización (ver sección 9); no se corrige por ser fork de terceros usado como sandbox | Reproducible: ver escenario Cucumber "DEF-01" — cualquier integrante obtiene el mismo resultado ejecutando `mvn test`. Evidencia: [cucumber_smoke_result.xml](../evidencias/cucumber_smoke_result.xml) |
+| DEF-02 | `DELETE /booking/:id` sobre un id inexistente responde `405 Method Not Allowed` en vez de `404 Not Found` (Riesgo R5) | Medio | P2 | New — confirmado por ejecución manual | Reproducible: `curl -X DELETE http://localhost:3001/booking/999999 -H "Authorization: Basic YWRtaW46cGFzc3dvcmQxMjM="`. Evidencia: [T05](../evidencias/riesgos/T05_delete_nonexistent.txt) |
+| DEF-03 | `totalprice` acepta valores negativos sin rechazo, y valores no numéricos (ej. `"abc"`) son **coaccionados silenciosamente a `null`** en vez de rechazarse (Riesgo R4) | Medio | P2 | New — confirmado por ejecución manual | Reproducible: `POST /booking` con `totalprice: -50` ([evidencia](../evidencias/riesgos/T04_totalprice_negative.txt)) y con `totalprice: "abc"` ([evidencia](../evidencias/riesgos/T04_totalprice_string.txt)) |
+| DEF-04 | `PUT /booking/:id` acepta el header `Authorization: Basic YWRtaW46cGFzc3dvcmQxMjM=` (documentado públicamente en el propio README del proyecto) sin que el cliente haya llamado `/auth` — permite modificar reservas de terceros sin flujo de autenticación real (Riesgo R3) | Crítico | P1 | New — confirmado por ejecución manual | Reproducible: `curl -X PUT http://localhost:3001/booking/1 -H "Authorization: Basic YWRtaW46cGFzc3dvcmQxMjM=" ...`. Evidencia: [T03](../evidencias/riesgos/T03_auth_hardcoded.txt) |
 
 **Reglas de triage y escalación:** el equipo revisa hallazgos nuevos al cierre de cada ciclo (sección 6); severidad Crítico/Alto se documenta con evidencia inmediata, severidad Medio/Bajo se registra para el backlog de hallazgos sin bloquear el smoke suite.
 
@@ -148,9 +149,9 @@ RTM también se publica como lista independiente en [`master-plan/evidencias/RTM
 
 ## 8. Métricas (mínimas)
 
-- [x] **% avance de ejecución de casos** (hechos/plan) — de los 11 casos diseñados (T01–T06 + RQ1–RQ5), cuántos se han ejecutado y documentado. Frecuencia: por ciclo (sección 6).
-- [x] **# defectos abiertos por severidad** — conteo de DEF-01/02/03 por clasificación. Frecuencia: al cierre de cada ciclo.
-- [x] **Tasa de éxito del smoke** (últimos N builds) — % de corridas del pipeline CI (sección 9) que terminan en verde. Frecuencia: por cada push/PR.
+- [x] **% avance de ejecución de casos** (hechos/plan) — **9 de 11 casos ejecutados y documentados (82%)** al cierre de este ciclo (T01–T06, RQ3–RQ5; pendientes: RQ1, RQ2 — autenticación y listado, no cubiertos por el foco en riesgos de escritura). Frecuencia: por ciclo (sección 6).
+- [x] **# defectos abiertos por severidad** — **Crítico: 2** (DEF-01, DEF-04) · **Medio: 2** (DEF-02, DEF-03) · Alto/Bajo: 0. Frecuencia: al cierre de cada ciclo. *Decisión que informa:* con 2 defectos críticos abiertos ligados a integridad de datos y autorización, se prioriza su corrección/documentación formal antes de ampliar cobertura funcional.
+- [x] **Tasa de éxito del smoke** (últimos N builds) — pipeline CI: **1/1 ejecuciones en verde** ([run #32411628327](https://github.com/contracamilo/restful-booker/actions/runs/32411628327)). *Nota aparte:* de los 8 casos de riesgo con veredicto concluyente (T01–T05, RQ3–RQ5), solo 1 confirma comportamiento correcto (12.5%) — esto no es una falla del smoke suite (que sigue en verde por diseño, sección 9), sino una señal de negocio: la API bajo prueba tiene múltiples reglas de negocio sin implementar, justificando la prioridad Alta asignada a R1–R3. Frecuencia: por cada push/PR.
 
 ---
 
@@ -159,7 +160,7 @@ RTM también se publica como lista independiente en [`master-plan/evidencias/RTM
 - [x] **Suite smoke ejecutable desde línea de comando:** Cucumber-JVM ejecutado a través del **runner de JUnit** (`RunCucumberTest`, anotado `@RunWith(Cucumber.class)`) — la ejecución produce reportes JUnit XML estándar (`target/surefire-reports/`), cumpliendo el requisito de la rúbrica ("JUnit, Postman o Selenium IDE"). Ubicación: [`master-plan/automation/`](../automation).
 - [x] **Pipeline CI que dispara la suite smoke:** GitHub Actions — [`.github/workflows/mtp-smoke.yml`](../../.github/workflows/mtp-smoke.yml) — levanta `restful-booker` vía `docker compose`, espera el health check (`GET /ping`), y corre `mvn test`.
 - [x] **Reporte de resultados:** JUnit XML + reporte HTML de Cucumber, publicados como artefacto del workflow (`actions/upload-artifact`); copia local en [`master-plan/evidencias/`](../evidencias).
-- [x] **Evidencia:** ejecución local confirmada — `BUILD SUCCESS`, `Tests run: 2, Failures: 0, Errors: 0` (ver [`junit_smoke_result.txt`](../evidencias/junit_smoke_result.txt) y [`cucumber_smoke_result.xml`](../evidencias/cucumber_smoke_result.xml)); tag `v1.0` y captura del pipeline en verde pendientes al cierre del repositorio (sección 10).
+- [x] **Evidencia:** ejecución local confirmada — `BUILD SUCCESS`, `Tests run: 2, Failures: 0, Errors: 0` (ver [`junit_smoke_result.txt`](../evidencias/junit_smoke_result.txt) y [`cucumber_smoke_result.xml`](../evidencias/cucumber_smoke_result.xml)) — **y pipeline de GitHub Actions en verde**: [run #32411628327](https://github.com/contracamilo/restful-booker/actions/runs/32411628327) (`conclusion: success`). Tag `v1.0` pendiente al cierre del repositorio (sección 10).
 
 **Los 2 escenarios automatizados:**
 1. *Crear una reserva válida* (cubre RQ3) — aserciones duras sobre código de estado, presencia de `bookingid`, y que los campos devueltos coincidan con el payload enviado.
@@ -197,5 +198,5 @@ mvn test                              # corre la suite Cucumber/JUnit
 - [x] Entrada/Salida por ciclo (sección 6)
 - [x] Flujo de defectos y severidades (sección 7)
 - [x] 3 KPIs mínimos definidos (sección 8)
-- [x] CI mínima funcionando con evidencia (sección 9 — confirmado localmente, `BUILD SUCCESS`)
+- [x] CI mínima funcionando con evidencia (sección 9 — local `BUILD SUCCESS` + [pipeline en verde en GitHub Actions](https://github.com/contracamilo/restful-booker/actions/runs/32411628327))
 - [ ] Reglas de versionado claras — pendiente el tag `v1.0` final (sección 10)

@@ -1,0 +1,11 @@
+=== T04b: R4 - totalprice no numerico ===
+HTTP/1.1 200 OK
+X-Powered-By: Express
+Content-Type: application/json; charset=utf-8
+Content-Length: 192
+ETag: W/"c0-IWKZn/uakrW+S6+oiKOR9sgDbF4"
+Date: Thu, 20 Aug 2026 20:01:10 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+{"bookingid":13,"booking":{"firstname":"Test","lastname":"R4str","totalprice":null,"depositpaid":true,"bookingdates":{"checkin":"2026-11-05","checkout":"2026-11-06"},"additionalneeds":"None"}}

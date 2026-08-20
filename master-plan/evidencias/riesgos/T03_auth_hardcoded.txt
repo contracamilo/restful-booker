@@ -1,0 +1,11 @@
+=== T03: R3 - Basic header hardcodeado sin llamar /auth, sobre PUT ===
+HTTP/1.1 200 OK
+X-Powered-By: Express
+Content-Type: application/json; charset=utf-8
+Content-Length: 176
+ETag: W/"b0-4NevO+qi2lhsPdO7PW6pc38Iwpo"
+Date: Thu, 20 Aug 2026 20:01:10 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+{"firstname":"Hacked","lastname":"ByHardcodedAuth","totalprice":999,"depositpaid":true,"bookingdates":{"checkin":"2026-01-01","checkout":"2026-01-02"},"additionalneeds":"None"}
