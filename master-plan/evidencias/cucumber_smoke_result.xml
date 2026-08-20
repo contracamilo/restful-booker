@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="Cucumber" time="0.7" tests="2" skipped="0" failures="0" errors="0">
+<testcase classname="Booking smoke suite" name="Crear una reserva valida" time="0.619">
+<system-out><![CDATA[
+Given la API restful-booker esta disponible en "http://localhost:3001"......passed
+When creo una reserva con nombre "Camilo" fechas "2026-09-01" a "2026-09-05" y precio 150.passed
+Then la respuesta tiene codigo de estado 200................................passed
+And la respuesta contiene un bookingid numerico.............................passed
+And los datos de la reserva devuelta coinciden con los enviados.............passed
+]]></system-out>
+</testcase>
+<testcase classname="Booking smoke suite" name="DEF-01 - la API acepta reservas solapadas sin control (comportamiento actual)" time="0.025">
+<system-out><![CDATA[
+Given la API restful-booker esta disponible en "http://localhost:3001"......passed
+Given ya existe una reserva con nombre "Guest1" fechas "2026-10-01" a "2026-10-05".passed
+When intento crear otra reserva con nombre "Guest2" fechas "2026-10-01" a "2026-10-05".passed
+Then ambas reservas se crean sin validacion de solapamiento, confirmando el defecto DEF-01.passed
+]]></system-out>
+</testcase>
+</testsuite>

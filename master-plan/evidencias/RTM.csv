@@ -1,0 +1,6 @@
+Requisito,Casos,Criterio de aceptacion,Severidad,Estado
+RQ1 - Autenticacion de usuario admin,"T-AUTH-01, T-AUTH-02",Token valido solo con credenciales correctas; credenciales incorrectas devuelven mensaje de error,Critico,Pendiente de ejecucion manual
+RQ2 - Consultar disponibilidad/listado de reservas,"T-GET-01, T-GET-02",GET /booking filtra correctamente por firstname/lastname/checkin/checkout,Alto,Pendiente de ejecucion manual
+RQ3 - Crear una reserva valida,Escenario Cucumber "Crear una reserva valida",Respuesta 200 con bookingid numerico y campos reflejando el payload enviado,Critico,Automatizado - PASA
+RQ4 - Prevenir/reportar solapamiento de reservas,Escenario Cucumber "DEF-01",Deberia rechazar reservas solapadas (comportamiento deseado); hoy documenta el defecto DEF-01,Critico,Defecto confirmado (DEF-01)
+RQ5 - Actualizar/eliminar reserva solo con autorizacion,"T03 (R3), T-DELETE-01",Operaciones de escritura devuelven 403 sin token valido,Critico,Pendiente de ejecucion manual
