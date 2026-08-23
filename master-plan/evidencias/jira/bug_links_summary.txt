@@ -1,0 +1,11 @@
+KAN-12 - DEF-01 - La API acepta reservas solapadas sin control
+   KAN-12 blocks -> KAN-3 T02 - Prevenir reservas solapadas (automatizado, Cucumber DEF-01)
+KAN-13 - DEF-02 - DELETE sobre id inexistente responde 405 en vez de 404
+   KAN-13 blocks -> KAN-7 T05 - DELETE sobre id inexistente debe responder 404
+KAN-14 - DEF-03 - totalprice acepta negativos y coacciona strings a null
+   KAN-14 blocks -> KAN-5 T04a - Rechazar totalprice negativo
+   KAN-14 blocks -> KAN-6 T04b - Rechazar totalprice no numerico
+KAN-15 - DEF-04 - Header Basic hardcodeado autoriza PUT sin pasar por /auth
+   KAN-15 blocks -> KAN-4 T03 - Validar autorizacion real en PUT/DELETE (no solo header hardcodeado)
+KAN-16 - DEF-05 - Tokens de autenticacion no expiran ni se invalidan
+   KAN-16 blocks -> KAN-8 T06 - Verificar expiracion de tokens de autenticacion

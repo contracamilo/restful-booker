@@ -1,0 +1,11 @@
+=== RQ1b: POST /auth con credenciales incorrectas ===
+HTTP/1.1 200 OK
+X-Powered-By: Express
+Content-Type: application/json; charset=utf-8
+Content-Length: 28
+ETag: W/"1c-J3EiwfZwVQjKTKvpvazUfTni8fI"
+Date: Thu, 20 Aug 2026 21:08:44 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+{"reason":"Bad credentials"}

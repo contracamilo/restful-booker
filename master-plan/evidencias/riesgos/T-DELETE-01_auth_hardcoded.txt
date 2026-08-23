@@ -1,0 +1,12 @@
+=== T-DELETE-01: DELETE con header Basic hardcodeado sin llamar /auth ===
+bookingid creado: 14
+HTTP/1.1 201 Created
+X-Powered-By: Express
+Content-Type: text/plain; charset=utf-8
+Content-Length: 7
+ETag: W/"7-rM9AyJuqT6iOan/xHh+AW+7K/T8"
+Date: Sun, 23 Aug 2026 18:26:46 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+Created
