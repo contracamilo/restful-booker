@@ -57,7 +57,7 @@ Formato: Impacto (1–5) × Probabilidad (1–5) = Nivel (IxP). Alto: 15–25, M
 **3.1 Niveles / Tipos de prueba:**
 - [x] Smoke (sanidad rápida de build) — `GET /ping` + creación de reserva válida
 - [x] Funcional de sistema (flujos críticos) — ciclo CRUD completo de `/booking`
-- [ ] Regresión mínima — se re-ejecuta el smoke suite en cada PR vía CI (ver sección 9)
+- [x] Regresión mínima — se re-ejecuta el smoke suite en cada PR vía CI (ver sección 9)
 - [ ] Aceptación (fuera de alcance para este ejercicio, ver sección 1.2)
 - [x] Seguridad básica (authN/authZ) — autorización de `PUT/PATCH/DELETE` (R3)
 
@@ -96,7 +96,7 @@ Formato: Impacto (1–5) × Probabilidad (1–5) = Nivel (IxP). Alto: 15–25, M
   - Caso(s): Escenario Cucumber "DEF-01" • Criterio(s): debería rechazar solapamiento (comportamiento deseado) • Severidad: Crítico • Estado: **Defecto confirmado (DEF-01)** — automatizado como prueba de caracterización que documenta el gap (ver sección 7)
 
 - **Req/Historia 5:** Actualizar/eliminar reserva solo con autorización (RQ5)
-  - Caso(s): T03 (R3), T-DELETE-01 • Criterio(s): operaciones de escritura devuelven 403 sin token válido • Severidad: Crítico • Estado: **Falló — defecto confirmado (DEF-04)**, ver evidencia [T03](../evidencias/riesgos/T03_auth_hardcoded.txt)
+  - Caso(s): T03 (R3), T-DELETE-01 • Criterio(s): operaciones de escritura devuelven 403 sin token válido • Severidad: Crítico • Estado: **Falló — defecto confirmado (DEF-04)**, aplica a `PUT` ([evidencia T03](../evidencias/riesgos/T03_auth_hardcoded.txt)) y a `DELETE` ([evidencia T-DELETE-01](../evidencias/riesgos/T-DELETE-01_auth_hardcoded.txt)) — ambos aceptan el header hardcodeado sin haber llamado `/auth`
 
 RTM también se publica como lista independiente en [`master-plan/evidencias/RTM.csv`](../evidencias/RTM.csv) para el entregable separado que exige la actividad.
 
@@ -140,7 +140,7 @@ RTM también se publica como lista independiente en [`master-plan/evidencias/RTM
 | DEF-01 | La API acepta reservas solapadas para el mismo rango de fechas sin ningún control (Riesgo R2) | Crítico | P1 | New — automatizado como prueba de caracterización (ver sección 9); no se corrige por ser fork de terceros usado como sandbox | Reproducible: ver escenario Cucumber "DEF-01" — cualquier integrante obtiene el mismo resultado ejecutando `mvn test`. Evidencia: [cucumber_smoke_result.xml](../evidencias/cucumber_smoke_result.xml) |
 | DEF-02 | `DELETE /booking/:id` sobre un id inexistente responde `405 Method Not Allowed` en vez de `404 Not Found` (Riesgo R5) | Medio | P2 | New — confirmado por ejecución manual | Reproducible: `curl -X DELETE http://localhost:3001/booking/999999 -H "Authorization: Basic YWRtaW46cGFzc3dvcmQxMjM="`. Evidencia: [T05](../evidencias/riesgos/T05_delete_nonexistent.txt) |
 | DEF-03 | `totalprice` acepta valores negativos sin rechazo, y valores no numéricos (ej. `"abc"`) son **coaccionados silenciosamente a `null`** en vez de rechazarse (Riesgo R4) | Medio | P2 | New — confirmado por ejecución manual | Reproducible: `POST /booking` con `totalprice: -50` ([evidencia](../evidencias/riesgos/T04_totalprice_negative.txt)) y con `totalprice: "abc"` ([evidencia](../evidencias/riesgos/T04_totalprice_string.txt)) |
-| DEF-04 | `PUT /booking/:id` acepta el header `Authorization: Basic YWRtaW46cGFzc3dvcmQxMjM=` (documentado públicamente en el propio README del proyecto) sin que el cliente haya llamado `/auth` — permite modificar reservas de terceros sin flujo de autenticación real (Riesgo R3) | Crítico | P1 | New — confirmado por ejecución manual | Reproducible: `curl -X PUT http://localhost:3001/booking/1 -H "Authorization: Basic YWRtaW46cGFzc3dvcmQxMjM=" ...`. Evidencia: [T03](../evidencias/riesgos/T03_auth_hardcoded.txt) |
+| DEF-04 | `PUT` y `DELETE /booking/:id` aceptan el header `Authorization: Basic YWRtaW46cGFzc3dvcmQxMjM=` (documentado públicamente en el propio README del proyecto) sin que el cliente haya llamado `/auth` — permite modificar/eliminar reservas de terceros sin flujo de autenticación real (Riesgo R3) | Crítico | P1 | New — confirmado por ejecución manual en ambos verbos | Reproducible: `curl -X PUT http://localhost:3001/booking/1 -H "Authorization: Basic YWRtaW46cGFzc3dvcmQxMjM=" ...` ([evidencia T03](../evidencias/riesgos/T03_auth_hardcoded.txt)) y `curl -X DELETE http://localhost:3001/booking/{id} -H "Authorization: Basic YWRtaW46cGFzc3dvcmQxMjM="` ([evidencia T-DELETE-01](../evidencias/riesgos/T-DELETE-01_auth_hardcoded.txt)) |
 
 **Reglas de triage y escalación:** el equipo revisa hallazgos nuevos al cierre de cada ciclo (sección 6); severidad Crítico/Alto se documenta con evidencia inmediata, severidad Medio/Bajo se registra para el backlog de hallazgos sin bloquear el smoke suite.
 
@@ -161,7 +161,7 @@ RTM también se publica como lista independiente en [`master-plan/evidencias/RTM
 - [x] **Suite smoke ejecutable desde línea de comando:** Cucumber-JVM ejecutado a través del **runner de JUnit** (`RunCucumberTest`, anotado `@RunWith(Cucumber.class)`) — la ejecución produce reportes JUnit XML estándar (`target/surefire-reports/`), cumpliendo el requisito de la rúbrica ("JUnit, Postman o Selenium IDE"). Ubicación: [`master-plan/automation/`](../automation).
 - [x] **Pipeline CI que dispara la suite smoke:** GitHub Actions — [`.github/workflows/mtp-smoke.yml`](../../.github/workflows/mtp-smoke.yml) — levanta `restful-booker` vía `docker compose`, espera el health check (`GET /ping`), y corre `mvn test`.
 - [x] **Reporte de resultados:** JUnit XML + reporte HTML de Cucumber, publicados como artefacto del workflow (`actions/upload-artifact`); copia local en [`master-plan/evidencias/`](../evidencias).
-- [x] **Evidencia:** ejecución local confirmada — `BUILD SUCCESS`, `Tests run: 2, Failures: 0, Errors: 0` (ver [`junit_smoke_result.txt`](../evidencias/junit_smoke_result.txt) y [`cucumber_smoke_result.xml`](../evidencias/cucumber_smoke_result.xml)) — **y pipeline de GitHub Actions en verde**: [run #32411628327](https://github.com/contracamilo/restful-booker/actions/runs/32411628327) (`conclusion: success`). Tag `v1.0` pendiente al cierre del repositorio (sección 10).
+- [x] **Evidencia:** ejecución local confirmada — `BUILD SUCCESS`, `Tests run: 2, Failures: 0, Errors: 0` (ver [`junit_smoke_result.txt`](../evidencias/junit_smoke_result.txt) y [`cucumber_smoke_result.xml`](../evidencias/cucumber_smoke_result.xml)) — **y pipeline de GitHub Actions en verde**: [run #32411628327](https://github.com/contracamilo/restful-booker/actions/runs/32411628327) (`conclusion: success`). Tag `v1.0` ya creado (sección 10).
 
 **Los 2 escenarios automatizados:**
 1. *Crear una reserva válida* (cubre RQ3) — aserciones duras sobre código de estado, presencia de `bookingid`, y que los campos devueltos coincidan con el payload enviado.
@@ -179,8 +179,8 @@ mvn test                              # corre la suite Cucumber/JUnit
 ## 10. Control de versiones (resumen)
 
 - [x] Rama principal (`main`) protegida — se trabaja en `feature/master-plan-setup`
-- [x] Ramas de feature + Pull Request obligatorio antes de integrar a `main`
-- [ ] Etiquetado de entregables: **`v1.0`** al cierre de la actividad (pendiente — se crea tras merge del PR, mínimo 3 commits en la rama de feature)
+- [x] Ramas de feature + Pull Request obligatorio antes de integrar a `main` ([PR #1](https://github.com/contracamilo/restful-booker/pull/1))
+- [x] Etiquetado de entregables: **`v1.0`** creado sobre `feature/master-plan-setup` (6 commits) — se mantiene válido tras el merge a `main`
 
 ---
 
@@ -200,4 +200,4 @@ mvn test                              # corre la suite Cucumber/JUnit
 - [x] Flujo de defectos y severidades (sección 7)
 - [x] 3 KPIs mínimos definidos (sección 8)
 - [x] CI mínima funcionando con evidencia (sección 9 — local `BUILD SUCCESS` + [pipeline en verde en GitHub Actions](https://github.com/contracamilo/restful-booker/actions/runs/32411628327))
-- [ ] Reglas de versionado claras — pendiente el tag `v1.0` final (sección 10)
+- [x] Reglas de versionado claras — tag `v1.0` creado (sección 10)
