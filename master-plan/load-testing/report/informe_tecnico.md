@@ -36,10 +36,15 @@ o del dashboard HTML — no inventar valores.]
 
 | Perfil | VUs máx | P50 (ms) | P95 (ms) | P99 (ms) | Throughput (req/s) | Tasa de error |
 |--------|---------|----------|----------|----------|---------------------|----------------|
-| load   |         |          |          |          |                     |                |
-| stress |         |          |          |          |                     |                |
+| load   | 20      | 2.34     | 7.45     | 11.50    | 9.30                | 0.00%          |
+| stress | 100     | 2.32     | 7.69     | 12.84    | 32.79               | 0.00%          |
 
-[Agregar observaciones de `docker stats` (CPU/RAM) durante la corrida, si se capturaron.]
+*(Corridas del 2026-09-15 contra Docker local, 1 sola instancia, en la máquina de Camilo —
+ver hardware exacto pendiente de completar en `config/environment.md`. Fuente:
+`results/load_20260915_1627_summary.json` y `results/stress_20260915_1632_summary.json`.)*
+
+[Faltan `spike` y `soak` — correrlos y agregar filas. Agregar observaciones de `docker stats`
+(CPU/RAM) durante alguna corrida, si se capturaron.]
 
 ## 5. Contraste con SLA/SLO
 
@@ -50,7 +55,17 @@ se cumplió o no, y en qué perfil empezó a fallar (típicamente el de `stress`
 
 [Priorizar 1–3 cuellos de botella reales observados: ¿qué paso del journey degrada primero al
 subir concurrencia? ¿CPU, memoria, o el propio Node single-thread del contenedor? ¿Algún endpoint
-específico (ej. `/auth` o `POST /booking`) que se vuelve el limitante?]
+específico (ej. `/auth` o `POST /booking`) que se vuelve el limitante?
+
+Dato relevante para esta sección: en la corrida de `stress` (hasta 100 VUs) la API NO se rompió —
+0% de error y p95 se mantuvo en 7.69ms, prácticamente igual que en `load` (20 VUs). Eso no
+significa que no haya cuello de botella, significa que con este volumen de datos (reservas
+efímeras, sin dataset grande) y en esta máquina, 100 VUs no alcanza a estresar el contenedor.
+Antes de concluir "no hay cuello de botella", el equipo debería: (a) revisar `docker stats`
+durante una corrida para ver si CPU/RAM ya iban en aumento aunque la latencia no lo reflejara
+todavía, y (b) considerar correr `stress` con más VUs o `spike` para encontrar el punto real de
+quiebre — de lo contrario el hallazgo honesto es "no se encontró el límite dentro del rango
+probado", no "el sistema soporta carga ilimitada".]
 
 ## 7. Propuestas de mejora priorizadas
 
