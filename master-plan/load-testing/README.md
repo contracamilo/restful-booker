@@ -91,11 +91,11 @@ PROFILE=load k6 run scripts/load_test.js --out csv=results/load_$(date +%Y%m%d_%
 
 ## 5. Checklist de entrega (mapea directo a los criterios de evaluación)
 
-- [ ] `config/environment.md` completado (hardware real usado, perfil final acordado, SLA/SLO confirmados)
-- [ ] Corridas de `load` y al menos otro perfil (`stress` o `spike` o `soak`) con resultados crudos en `results/`
-- [ ] Reporte HTML/CSV + capturas de `docker stats` durante alguna corrida
-- [ ] `report/informe_tecnico.md` completado (~800 palabras): percentiles P50/P95/P99, throughput, errores,
-      contraste con SLA/SLO, cuellos de botella priorizados
+- [x] `config/environment.md` completado (hardware real, perfiles, SLI/SLO/SLA aclarados)
+- [x] Corridas de los 4 perfiles (`load`, `stress`, `spike`, `soak`) con resultados en `results/`
+- [x] Reporte HTML del dashboard (`results/spike_*_report.html`) + `docker stats` durante `soak`
+- [x] `report/informe_tecnico.md` completado (~974 palabras): percentiles P50/P95/P99, throughput,
+      errores, contraste con SLO, cuellos de botella y propuestas priorizadas
 - [ ] Todo commiteado en esta rama (`feature/actividad-3-load-testing`) y PR abierto
 
 ## 6. Estructura
