@@ -112,9 +112,9 @@ master-plan/load-testing/
     └── informe_tecnico.md       ← informe técnico ~800 palabras (completar después de ejecutar)
 ```
 
-## Nota para Karen y Richard
+## Nota de equipo
 
-El script y la config ya están listos para correr — solo necesitan Docker + `brew install k6`.
-Lo que falta es **ejecutar** los perfiles contra su máquina (los números de `config/environment.md`
-son un punto de partida, no el resultado final) y llenar `report/informe_tecnico.md` con lo que
-midan. Repartan perfiles entre los tres para tener variedad de evidencia antes del 20 de septiembre.
+Por tiempo, Camilo hace esta actividad solo (con ayuda de Claude), cubriendo los 3 roles que
+propone el material del curso (Modelador/Scripter/Analista) en vez de repartirlos entre los tres.
+Karen y Richard: si alcanzan a aportar algo (una corrida en su máquina, revisar el informe antes de
+entregar), bienvenido, pero el plan no depende de eso para llegar a tiempo al 20 de septiembre.

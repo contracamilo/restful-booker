@@ -10,8 +10,9 @@ Documenta entorno, perfil de carga y supuestos, tal como lo pide el entregable
 - **Despliegue:** contenedor Docker local (`docker compose up -d --build`), API en `http://localhost:3001`.
 - **Base de datos:** LokiJS embebido en el contenedor (sin persistencia externa) — cada `docker compose up`
   arranca con datos limpios salvo que se use `SEED=true`.
-- **Hardware de referencia:** *(completar por quien ejecute: chip, RAM, SO — esto condiciona los resultados
-  y debe declararse en el informe porque no es un ambiente productivo dedicado).*
+- **Hardware de referencia:** MacBook con chip Apple M3 Max (14 núcleos), 36 GB RAM, macOS 26.6.2 (arm64).
+  Condiciona los resultados — es una laptop de desarrollo, no un ambiente productivo dedicado, así que los
+  números de throughput/latencia no son comparables a los de un servidor real.
 - **Red:** localhost (sin latencia de red real) — los tiempos medidos reflejan procesamiento de la app,
   no condiciones de internet. Esto es una limitación a declarar en el informe.
 - **Observabilidad disponible:** no hay APM/tracing centralizado para este proyecto de práctica.
@@ -38,19 +39,31 @@ Encuentro Virtual 4 (modelado de carga). *Ajustar aquí si el equipo decide otro
 **Think time:** 1–3 s aleatorios entre pasos (`THINK_MIN`/`THINK_MAX`), simulando lectura/decisión de un
 usuario real en vez de disparar requests espalda con espalda.
 
-## 3. SLA/SLO asumidos (a validar en EV-5 — debrief)
+## 3. SLI / SLO asumidos (a validar en EV-5 — debrief)
 
-No hay un SLA publicado para esta API de práctica, así que el equipo define las siguientes metas como
-supuesto de trabajo (quedan como thresholds en `scripts/load_test.js`):
+Terminología (según el material del curso — jerarquía SLI/SLO/SLA de Google SRE):
+- **SLI** (Service Level Indicator): lo que se **mide** — el dato real y objetivo (ej. "el P95 fue 7.45ms").
+- **SLO** (Service Level Objective): la meta **interna** del equipo — contra esto se validan las pruebas.
+- **SLA** (Service Level Agreement): la promesa **externa**/contractual, con penalización si se incumple —
+  suele ser más holgada que el SLO. **No aplica aquí**: esta es una API de práctica sin cliente externo ni
+  contrato, así que el equipo solo define y valida **SLOs**, no un SLA. (Antes esta sección decía
+  "SLA/SLO" indistintamente — corregido: lo que sigue son SLOs.)
+
+No hay un SLO publicado por un tercero para esta API de práctica, así que el equipo define las siguientes
+metas como supuesto de trabajo (quedan como thresholds en `scripts/load_test.js`):
 
 - `p95` de tiempo de respuesta global < **800 ms**
 - `p99` de tiempo de respuesta global < **1500 ms**
 - Tasa de error (`http_req_failed`) < **1%**
+- Throughput (`http_reqs` rate) ≥ **150 TPS** *(referencia del material del curso; nuestras corridas
+  locales van muy por debajo — 9–33 req/s — porque el volumen de VUs modelado es bajo, no porque el
+  sistema no dé más: ver nota en `report/informe_tecnico.md` sección 4)*
 - `p95` del paso de autenticación (`/auth`) < **500 ms**
 - `p95` de creación de reserva (`POST /booking`) < **800 ms**
 
 *Si el equipo decide otros valores, actualizarlos aquí y en el bloque `thresholds` del script para que
-coincidan — son la misma fuente de verdad.*
+coincidan — son la misma fuente de verdad. El SLI (resultado medido) siempre sale de `results/*_summary.json`,
+nunca se inventa.*
 
 ## 4. Supuestos y limitaciones declaradas
 
