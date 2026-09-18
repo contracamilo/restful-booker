@@ -3,10 +3,7 @@
 # pero no se versionan en git para no inflar el historial del repo.
 # Los resúmenes (*_summary.json) y logs de consola sí se versionan: son livianos y
 # suficientes para reproducir las tablas del informe técnico.
-load_*.json
-stress_*.json
-spike_*.json
-soak_*.json
+*.json
 !*_summary.json
 
 # El reporte HTML del dashboard (k6 --web-dashboard) y exports CSV SÍ se versionan — son

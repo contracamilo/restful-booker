@@ -40,6 +40,10 @@ PROFILE=spike k6 run scripts/load_test.js
 
 # Soak/resistencia — por defecto 10 min, para evidencia final usar más tiempo
 SOAK_DURATION=45m PROFILE=soak k6 run scripts/load_test.js
+
+# Breakpoint — escalones hasta 1000 VUs para buscar el punto de quiebre real
+# (los otros 4 perfiles no lo encontraron — ver informe técnico sección 6)
+PROFILE=breakpoint k6 run scripts/load_test.js
 ```
 
 Variables disponibles (todas opcionales, con default razonable):
@@ -47,7 +51,7 @@ Variables disponibles (todas opcionales, con default razonable):
 | Variable       | Default                  | Qué hace                              |
 |----------------|---------------------------|----------------------------------------|
 | `BASE_URL`     | `http://localhost:3001`   | URL de la API bajo prueba              |
-| `PROFILE`      | `load`                    | `smoke`\|`load`\|`stress`\|`spike`\|`soak` |
+| `PROFILE`      | `load`                    | `smoke`\|`load`\|`stress`\|`spike`\|`soak`\|`breakpoint` |
 | `ADMIN_USER`   | `admin`                   | Usuario para `/auth`                   |
 | `ADMIN_PASS`   | `password123`             | Password para `/auth`                  |
 | `THINK_MIN`    | `1`                       | Segundos mínimos de think time         |

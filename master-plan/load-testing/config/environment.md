@@ -24,13 +24,20 @@ Documenta entorno, perfil de carga y supuestos, tal como lo pide el entregable
 
 ## 2. Perfil de carga (modelo)
 
-| Perfil  | Uso                                   | Concurrencia (VUs)      | Duración aprox. |
-|---------|----------------------------------------|--------------------------|------------------|
-| smoke   | Validar que el script y la API sirven  | 1                         | 30 s             |
-| load    | Carga esperada en operación normal     | 0→20 (rampa), sostenida  | ~5 min           |
-| stress  | Buscar el punto de quiebre             | 0→30→60→100 (escalones)  | ~11 min          |
-| spike   | Ráfaga súbita (ej. apertura de reservas)| 5→150→5                  | ~2 min           |
-| soak    | Resistencia / fugas de recursos        | 15 constantes            | 10 min (ajustar a 45 min+ para evidencia final) |
+| Perfil     | Uso                                   | Concurrencia (VUs)      | Duración aprox. |
+|------------|----------------------------------------|--------------------------|------------------|
+| smoke      | Validar que el script y la API sirven  | 1                         | 30 s             |
+| load       | Carga esperada en operación normal     | 0→20 (rampa), sostenida  | ~5 min           |
+| stress     | Empujar por encima de lo esperado      | 0→30→60→100 (escalones)  | ~11 min          |
+| spike      | Ráfaga súbita (ej. apertura de reservas)| 5→150→5                  | ~2 min           |
+| soak       | Resistencia / fugas de recursos        | 15 constantes            | 15 min (ajustar a 45 min+ para evidencia más robusta) |
+| breakpoint | Buscar el punto de quiebre real        | 0→100→...→1000 (escalones)| ~7 min          |
+
+**Resultado de `breakpoint` (2026-09-18):** ni siquiera a 1000 VUs se incumplió un SLO (0% error,
+p95=8.09ms) — pero `docker stats` sí mostró presión real: CPU de ~1% a 22–27%, RAM de 113 a 206 MiB.
+El punto de quiebre real está más allá de 1000 VUs o requiere quitar el think time. `stress` dejó de
+ser, en la práctica, el perfil que busca el quiebre — ese rol lo cumple ahora `breakpoint`; `stress`
+queda como el escalón intermedio "por encima de lo normal pero aún realista".
 
 **Supuesto de concurrencia:** al no existir datos reales de producción para esta API de práctica, el equipo
 asume 20 usuarios concurrentes como "carga normal" y hasta 100 como estrés, en línea con lo trabajado en el

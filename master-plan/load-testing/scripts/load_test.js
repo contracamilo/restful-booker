@@ -83,6 +83,27 @@ const PROFILES = {
     vus: 15,
     duration: __ENV.SOAK_DURATION || '10m',
   },
+  // Breakpoint: escalones agresivos hasta 1000 VUs (mismo journey y think time realista de
+  // siempre) para encontrar de verdad el punto de quiebre — `load`/`stress`/`spike` no llegaron
+  // a estresar la API (ver informe técnico), así que este perfil empuja mucho más lejos.
+  // Se espera que los thresholds se incumplan en algún escalón: eso ES el resultado buscado,
+  // no un error del script.
+  breakpoint: {
+    executor: 'ramping-vus',
+    startVUs: 0,
+    stages: [
+      { duration: '30s', target: 100 },
+      { duration: '30s', target: 200 },
+      { duration: '30s', target: 300 },
+      { duration: '30s', target: 400 },
+      { duration: '30s', target: 500 },
+      { duration: '30s', target: 700 },
+      { duration: '1m', target: 1000 },
+      { duration: '2m', target: 1000 },
+      { duration: '30s', target: 0 },
+    ],
+    gracefulRampDown: '30s',
+  },
 };
 
 const PROFILE = __ENV.PROFILE || 'load';

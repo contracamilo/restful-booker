@@ -16,12 +16,13 @@ soporta más tráfico.
 ## 2. Modelo de carga y supuestos
 
 Detalle completo en [`config/environment.md`](../config/environment.md). Entorno: un solo contenedor
-Docker sin balanceo, en una MacBook Apple M3 Max / 36 GB RAM — los números aquí comparan perfiles
-entre sí, no representan un ambiente productivo. Perfiles: `load` (20 VUs, 5 min, carga normal),
-`stress` (rampa por escalones hasta 100 VUs, 11 min, buscando el punto de quiebre), `spike` (salto a
-150 VUs, 2 min) y `soak` (15 VUs, 15 min — acortado de los 45+ recomendados por tiempo del equipo,
-limitación declarada). Sin datos reales de producción, el equipo asumió 20 usuarios concurrentes como
-carga normal y hasta 150 como pico, siguiendo el modelado del Encuentro Virtual 4.
+Docker sin balanceo, en una MacBook Apple M3 Max / 36 GB RAM — números válidos para comparar entre
+perfiles, no representativos de un ambiente productivo. Perfiles: `load` (20 VUs, 5 min), `stress`
+(rampa hasta 100 VUs, 11 min), `spike` (150 VUs, 2 min), `soak` (15 VUs, 15 min — acortado de los 45+
+recomendados por tiempo del equipo, limitación declarada) y `breakpoint` (escalones hasta 1000 VUs,
+~7 min, agregado después de que los cuatro anteriores no lograran estresar la API). Sin datos reales
+de producción, el equipo asumió 20 usuarios como carga normal y hasta 150 como pico (Encuentro Virtual
+4); `breakpoint` sale deliberadamente de ese supuesto para buscar el límite real.
 
 ## 3. Diseño del plan de pruebas
 
@@ -45,14 +46,19 @@ cuello de botella si apareciera.
 | stress | 100     | 11 min   | 2.32     | 7.69     | 12.84    | 32.79               | 0.00%          |
 | spike  | 150     | 2 min    | 2.74     | 5.98     | 9.90     | 51.89               | 0.00%          |
 | soak   | 15      | 15 min   | 3.60     | 10.11    | 13.98    | 8.69                | 0.00%          |
+| breakpoint | 1000 | 6m44s    | 1.90     | 8.09     | 12.37    | 356.58              | 0.00%          |
 
 *(Corridas del 2026-09-15 y 2026-09-18 contra Docker local, 1 sola instancia, MacBook Apple M3 Max /
-36 GB RAM (`config/environment.md`). Fuente: `results/{load,stress,spike,soak}_*_summary.json`.)*
+36 GB RAM (`config/environment.md`). Fuente: `results/{load,stress,spike,soak,breakpoint}_*_summary.json`.)*
 
-**Uso de recursos (`docker stats`, muestreado cada 20s durante `soak`, 15 min):** CPU entre 0.5% y
-1.6% en todo momento; RAM subió de 116.8 MiB a 119.8 MiB (+3 MiB en 15 min, prácticamente plano) —
-sin señal de fuga de memoria en esta ventana de tiempo. Evidencia completa en
-`results/docker-stats/soak_20260918_1115.log`.
+**Uso de recursos (`docker stats`, muestreado cada 20s):**
+- Durante `soak` (15 VUs, 15 min): CPU entre 0.5% y 1.6% en todo momento; RAM subió de 116.8 MiB a
+  119.8 MiB (+3 MiB, prácticamente plano) — sin señal de fuga de memoria en esta ventana.
+- Durante `breakpoint` (hasta 1000 VUs): CPU subió de ~1% en reposo a **22–27%** en el pico de carga;
+  RAM subió de 113 MiB a **206 MiB** (+83%) y volvió a 112 MiB al bajar a 0 VUs — confirma que es
+  memoria de conexiones/trabajo activo, no una fuga. Es la primera señal medible de que el sistema
+  sí responde al aumento de concurrencia, aunque sin llegar a incumplir SLOs. Evidencia completa en
+  `results/docker-stats/`.
 
 ## 5. Contraste con SLO
 
@@ -64,7 +70,7 @@ Nota de terminología (jerarquía SRE): lo que sigue son **SLOs** (metas interna
 | Latencia P95                    | < 800 ms       | 7.45 ms (load) / 7.69 ms (stress) / 5.98 ms (spike) | ✅ Sí |
 | Latencia P99                    | < 1500 ms      | 11.50 ms (load) / 12.84 ms (stress) / 9.90 ms (spike) | ✅ Sí |
 | Tasa de errores                 | < 1%           | 0.00% (load, stress y spike) | ✅ Sí |
-| Throughput                      | ≥ 150 TPS      | 9.30 (load) / 32.79 (stress) / 51.89 (spike) / 8.69 req/s (soak) | ❌ No |
+| Throughput                      | ≥ 150 TPS      | 9.30 (load) / 32.79 (stress) / 51.89 (spike) / 8.69 (soak) / 356.58 req/s (breakpoint, 1000 VUs) | ❌ No |
 | Disponibilidad                  | ≥ 99.95%       | 100.00% (`checks_succeeded`, corrida de 15 min sin caídas) | ✅ Sí |
 
 **Sobre el throughput:** no incumple por falla del sistema — error rate 0% y latencia estable indican
@@ -76,22 +82,23 @@ incumplimiento oculto — y se recalibra el SLO al contexto real modelado.
 
 ## 6. Cuellos de botella identificados
 
-El hallazgo principal: **no se encontró el punto de quiebre de la API dentro del rango probado**
-(hasta 100 VUs sostenidos, picos de 150, 15 min de soak) — 0% de error, latencia estable (p95 entre 6
-y 10ms) y `docker stats` con CPU bajo 2% y memoria plana. Esto no significa "carga ilimitada": significa
-que este rango, con este volumen de datos y en esta máquina, no alcanza a estresar la API. De ahí dos
-cuellos de botella reales, distintos a los que se buscaban originalmente:
+`load`, `stress` y `spike` (hasta 150 VUs) no lograron estresar la API: 0% error, latencia estable,
+CPU bajo 2%. Por eso se agregó `breakpoint`, empujando hasta 1000 VUs — y ahí sí apareció señal real:
+CPU subió ~20x (de ~1% a 22–27%) y RAM ~83% bajo carga. Aun así, **tampoco a 1000 VUs se incumplió
+ningún SLO** (0% error, p95=8.09ms). Dos lecturas de esto:
 
-1. **El modelo de carga es el limitante, no la API** — el think time pone un techo bajo al throughput
-   por VU; encontrar el límite real requeriría un perfil sin think time o con 500–1000+ VUs.
+1. **El verdadero límite sigue sin encontrarse, pero ya no es "no se buscó lo suficiente".** Con CPU
+   en ~25% en una máquina de 14 núcleos, el contenedor (Node de un solo hilo) todavía tiene margen —
+   el cuello de botella real probablemente aparece bien por encima de 1000 VUs, o exige quitar el
+   think time para generar tráfico puro en vez de usuarios simulados.
 2. **El volumen de datos de prueba no representa un sistema con historial** — cada corrida arranca con
    la base casi vacía (sin `SEED`); `GET /booking` con miles de registros acumulados es un escenario
-   no evaluado.
+   aparte, no evaluado, y podría ser el cuello de botella real antes que la concurrencia pura.
 
 ## 7. Propuestas de mejora priorizadas
 
-1. **Repetir `stress`/`spike` con mayor concurrencia (500–1000 VUs) y sin think time**, para
-   efectivamente encontrar el punto de quiebre en vez de reportar "no se encontró" como resultado final.
+1. **Seguir subiendo la concurrencia más allá de 1000 VUs y probar sin think time** (tráfico puro), ya
+   que a 1000 VUs el CPU del contenedor apenas llega a ~25% — todavía hay margen antes del quiebre real.
 2. **Pre-cargar la base de datos con un volumen realista** (`SEED=true` o un script que inserte miles
    de reservas) antes de correr `load`/`stress`, para medir el efecto del volumen de datos sobre
    `GET /booking`, hoy no evaluado.
@@ -104,12 +111,14 @@ cuellos de botella reales, distintos a los que se buscaban originalmente:
 
 ## 8. Conclusiones
 
-Dentro del rango modelado (hasta 100 VUs sostenidos, picos de 150, 15 min de resistencia), Restful-Booker
-cumple todos los SLO salvo throughput —brecha explicada por el diseño del modelo de carga, no por el
-sistema—: 0% de errores, p95 máximo de 10.11ms contra un umbral de 800ms, sin señales de degradación
-sostenida. La API está lista para el nivel de tráfico aquí modelado. Antes de prometer más, se
-recomienda cerrar los dos puntos de la sección 6 (límite real con más concurrencia, y volumen de datos
-representativo) — temas para el debrief de EV-5.
+Restful-Booker cumple todos los SLO salvo throughput (brecha explicada por el diseño del modelo de
+carga, no por el sistema) hasta 1000 VUs concurrentes: 0% de errores, p95 máximo de 10.11ms contra un
+umbral de 800ms, sin señales de degradación sostenida. Sí hay evidencia de que el sistema trabaja más
+bajo carga (CPU y RAM escalan claramente entre 15 y 1000 VUs), pero el punto de quiebre real sigue sin
+encontrarse dentro de lo probado. La API está lista para el nivel de tráfico aquí modelado, e incluso
+para picos varias veces mayores a lo asumido inicialmente (20–150 VUs). Antes de prometer más, se
+recomienda cerrar los dos puntos de la sección 6 (empujar la concurrencia sin think time, y probar con
+volumen de datos representativo) — temas para el debrief de EV-5.
 
 ---
 *Extensión objetivo: ~800 palabras (sin contar tablas). Evidencia de respaldo en `../results/`.*
