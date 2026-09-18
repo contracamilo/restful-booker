@@ -1,9 +1,3 @@
-<!--
-Esqueleto del informe técnico (~800 palabras). Completar DESPUÉS de ejecutar las pruebas
-(no antes) — cada sección abajo mapea a un criterio de evaluación de la Actividad 3.
-Borrar los comentarios [ ] una vez se llene cada sección.
--->
-
 # Informe técnico — Prueba de rendimiento Restful-Booker
 
 **Equipo:** Camilo Rivera, Karen Torres, Richard Caicedo
@@ -12,76 +6,53 @@ Borrar los comentarios [ ] una vez se llene cada sección.
 
 ## 1. Contexto y objetivo
 
-Esta actividad continúa sobre el mismo sistema bajo prueba de la Actividad 2 (Master Test Plan):
-el fork del equipo de [Restful-Booker](https://github.com/contracamilo/restful-booker), una API
-REST de reservas (autenticación + CRUD de bookings) usada como laboratorio de pruebas. El objetivo
-aquí es distinto al de la Actividad 2: en vez de validar *funcionalidad* (¿la API hace lo que debe?),
-se valida *rendimiento* (¿lo hace dentro de un tiempo y volumen aceptable, y en qué punto deja de
-hacerlo?). Se diseñó e implementó un script de carga en k6 (JavaScript) y se ejecutaron cuatro
-perfiles — carga, estrés, spike y soak/resistencia — contra la API corriendo en un contenedor Docker
-local, para contrastar los resultados frente a los SLO que el equipo definió como meta interna y
-para identificar, con evidencia, si existe algún cuello de botella antes de considerar la API lista
-para un volumen de tráfico mayor.
+Esta actividad continúa sobre el sistema de la Actividad 2: el fork del equipo de
+[Restful-Booker](https://github.com/contracamilo/restful-booker), una API REST de reservas. Ahora el
+objetivo no es validar funcionalidad sino **rendimiento**: se diseñó un script de carga en k6 y se
+ejecutaron cuatro perfiles (carga, estrés, spike, soak) contra la API en Docker local, para
+contrastar resultados frente a SLOs propios y detectar cuellos de botella antes de asumir que la API
+soporta más tráfico.
 
 ## 2. Modelo de carga y supuestos
 
-El detalle completo vive en [`config/environment.md`](../config/environment.md); resumen:
-
-- **Entorno:** un solo contenedor Docker (`docker compose up`), sin balanceo ni réplicas, corriendo
-  en una MacBook con chip Apple M3 Max (14 núcleos), 36 GB RAM. Esto es una limitación deliberada a
-  declarar: los números de throughput/latencia son válidos para comparar entre perfiles de esta misma
-  máquina, pero no son representativos de un ambiente productivo con más recursos o balanceado.
-- **Perfiles ejecutados:** `load` (20 VUs, rampa de 5 min, carga esperada en operación normal),
-  `stress` (rampa por escalones hasta 100 VUs, ~11 min, para buscar el punto de quiebre), `spike`
-  (salto súbito a 150 VUs sostenido 1 min, para ver comportamiento ante ráfagas) y `soak` (15 VUs
-  constantes durante 15 min, para detectar degradación o fugas de recursos por tiempo sostenido —
-  se acortó de los 45+ min recomendados por restricción de tiempo del equipo, declarado como
-  limitación).
-- **Supuesto de concurrencia:** sin datos reales de producción para esta API de práctica, el equipo
-  asumió 20 usuarios concurrentes como "carga normal" y hasta 100–150 como estrés/pico, siguiendo lo
-  trabajado en el Encuentro Virtual 4 de modelado de carga.
+Detalle completo en [`config/environment.md`](../config/environment.md). Entorno: un solo contenedor
+Docker sin balanceo, en una MacBook Apple M3 Max / 36 GB RAM — los números aquí comparan perfiles
+entre sí, no representan un ambiente productivo. Perfiles: `load` (20 VUs, 5 min, carga normal),
+`stress` (rampa por escalones hasta 100 VUs, 11 min, buscando el punto de quiebre), `spike` (salto a
+150 VUs, 2 min) y `soak` (15 VUs, 15 min — acortado de los 45+ recomendados por tiempo del equipo,
+limitación declarada). Sin datos reales de producción, el equipo asumió 20 usuarios concurrentes como
+carga normal y hasta 150 como pico, siguiendo el modelado del Encuentro Virtual 4.
 
 ## 3. Diseño del plan de pruebas
 
-El script (`scripts/load_test.js`, documentado en detalle en [`scripts/README.md`](../scripts/README.md))
-implementa un único *journey* de usuario en vez de llamadas aisladas a endpoints sueltos, para medir
-el flujo de mayor valor de negocio de la API de punta a punta:
+El script (`scripts/load_test.js`, documentado en [`scripts/README.md`](../scripts/README.md))
+implementa un *journey* completo, no llamadas aisladas: `GET /ping` → `GET /booking?firstname=..` →
+`POST /auth` → `POST /booking` → `GET /booking/:id` → `PUT /booking/:id` → `DELETE /booking/:id`.
 
-`GET /ping` (salud) → `GET /booking?firstname=..` (búsqueda) → `POST /auth` (login) →
-`POST /booking` (crear reserva) → `GET /booking/:id` (consultar) → `PUT /booking/:id` (actualizar) →
-`DELETE /booking/:id` (eliminar).
-
-Puntos clave del diseño:
-- **Correlación:** el token que devuelve `/auth` se reinyecta como header `Cookie` en los pasos de
-  `PUT`/`DELETE`, y el `bookingid` que devuelve la creación se reutiliza en los pasos siguientes — sin
-  esto cada paso operaría sobre datos inconexos, no sobre "la reserva de este usuario".
-- **Parametrización:** entorno (`BASE_URL`), credenciales, perfil de carga y think time son variables
-  de entorno, no valores fijos — el mismo script corre en cualquier máquina del equipo sin editar código.
-- **Think time:** 1–3 segundos aleatorios entre pasos, para no disparar requests espalda con espalda
-  (que no simularía un usuario real leyendo/decidiendo).
-- **Assertions y umbrales:** cada request lleva `check()` de status/contenido, y se definieron
-  thresholds agregados (ver sección 5) tanto globales como por paso (`{step:auth}`,
-  `{step:create_booking}`, `{step:search_bookings}`) para poder aislar si el cuello de botella está en
-  un endpoint específico.
+Puntos clave: **correlación** (el token de `/auth` se reinyecta como `Cookie` en `PUT`/`DELETE`, y el
+`bookingid` creado se reutiliza en los pasos siguientes); **parametrización** (`BASE_URL`,
+credenciales, perfil y think time por variable de entorno, sin valores fijos en código);
+**think time** de 1–3s aleatorio entre pasos, para simular un usuario real y no tráfico puro; y
+**assertions/umbrales** — `check()` por request más thresholds agregados globales y por paso
+(`{step:auth}`, `{step:create_booking}`, `{step:search_bookings}`) para aislar dónde estaría el
+cuello de botella si apareciera.
 
 ## 4. Resultados
 
-[Tabla con percentiles P50/P95/P99 de `http_req_duration`, throughput (requests/s o iteraciones/s)
-y tasa de error, por perfil ejecutado. Completar con los números reales del `--summary-export`
-o del dashboard HTML — no inventar valores.]
-
-| Perfil | VUs máx | P50 (ms) | P95 (ms) | P99 (ms) | Throughput (req/s) | Tasa de error |
-|--------|---------|----------|----------|----------|---------------------|----------------|
-| load   | 20      | 2.34     | 7.45     | 11.50    | 9.30                | 0.00%          |
-| stress | 100     | 2.32     | 7.69     | 12.84    | 32.79               | 0.00%          |
-| spike  | 150     | 2.74     | 5.98     | 9.90     | 51.89               | 0.00%          |
-| soak   | 15      | [pendiente — corrida en curso] | | | | |
+| Perfil | VUs máx | Duración | P50 (ms) | P95 (ms) | P99 (ms) | Throughput (req/s) | Tasa de error |
+|--------|---------|----------|----------|----------|----------|---------------------|----------------|
+| load   | 20      | 5 min    | 2.34     | 7.45     | 11.50    | 9.30                | 0.00%          |
+| stress | 100     | 11 min   | 2.32     | 7.69     | 12.84    | 32.79               | 0.00%          |
+| spike  | 150     | 2 min    | 2.74     | 5.98     | 9.90     | 51.89               | 0.00%          |
+| soak   | 15      | 15 min   | 3.60     | 10.11    | 13.98    | 8.69                | 0.00%          |
 
 *(Corridas del 2026-09-15 y 2026-09-18 contra Docker local, 1 sola instancia, MacBook Apple M3 Max /
-36GB RAM (`config/environment.md`). Fuente: `results/{load,stress,spike,soak}_*_summary.json`.)*
+36 GB RAM (`config/environment.md`). Fuente: `results/{load,stress,spike,soak}_*_summary.json`.)*
 
-[Falta completar la fila de `soak` cuando termine la corrida. Agregar observaciones de `docker stats`
-(CPU/RAM) — capturadas en `results/docker-stats/` durante el soak.]
+**Uso de recursos (`docker stats`, muestreado cada 20s durante `soak`, 15 min):** CPU entre 0.5% y
+1.6% en todo momento; RAM subió de 116.8 MiB a 119.8 MiB (+3 MiB en 15 min, prácticamente plano) —
+sin señal de fuga de memoria en esta ventana de tiempo. Evidencia completa en
+`results/docker-stats/soak_20260918_1115.log`.
 
 ## 5. Contraste con SLO
 
@@ -93,42 +64,52 @@ Nota de terminología (jerarquía SRE): lo que sigue son **SLOs** (metas interna
 | Latencia P95                    | < 800 ms       | 7.45 ms (load) / 7.69 ms (stress) / 5.98 ms (spike) | ✅ Sí |
 | Latencia P99                    | < 1500 ms      | 11.50 ms (load) / 12.84 ms (stress) / 9.90 ms (spike) | ✅ Sí |
 | Tasa de errores                 | < 1%           | 0.00% (load, stress y spike) | ✅ Sí |
-| Throughput                      | ≥ 150 TPS      | 9.30 (load) / 32.79 (stress) / 51.89 req/s (spike) | ❌ No |
-| Disponibilidad                  | ≥ 99.95%       | [completar con resultado de `soak` — checks_succeeded de la corrida de 15 min] | ⏳ Pendiente |
+| Throughput                      | ≥ 150 TPS      | 9.30 (load) / 32.79 (stress) / 51.89 (spike) / 8.69 req/s (soak) | ❌ No |
+| Disponibilidad                  | ≥ 99.95%       | 100.00% (`checks_succeeded`, corrida de 15 min sin caídas) | ✅ Sí |
 
-[Completar: el throughput no cumple, pero ojo — NO es porque el sistema se sature (el error rate es 0%
-y la latencia no sube), sino porque el modelo de carga (20–100 VUs con think time de 1–3s) no genera
-150 TPS por diseño. Antes de reportar esto como "incumplimiento", el equipo debe decidir: ¿el SLO de
-150 TPS es realista para el volumen de usuarios que se está modelando, o hay que ajustar el SLO al
-modelo de carga real en vez de forzar el modelo para llegar a un número de una slide genérica? Esa
-decisión y su justificación van aquí.]
+**Sobre el throughput:** no incumple por falla del sistema — error rate 0% y latencia estable indican
+margen de sobra. El SLO de 150 TPS es una referencia genérica del curso; nuestro modelo de carga (think
+time de 1–3s por paso, pensado para simular usuarios reales, no tráfico puro) pone un techo bajo al
+throughput por VU sin importar cuántas VUs se agreguen. Decisión del equipo: en vez de forzar el
+modelo a un número irreal para esta API de práctica, se documenta la brecha como hallazgo — no como
+incumplimiento oculto — y se recalibra el SLO al contexto real modelado.
 
 ## 6. Cuellos de botella identificados
 
-[Priorizar 1–3 cuellos de botella reales observados: ¿qué paso del journey degrada primero al
-subir concurrencia? ¿CPU, memoria, o el propio Node single-thread del contenedor? ¿Algún endpoint
-específico (ej. `/auth` o `POST /booking`) que se vuelve el limitante?
+El hallazgo principal: **no se encontró el punto de quiebre de la API dentro del rango probado**
+(hasta 100 VUs sostenidos, picos de 150, 15 min de soak) — 0% de error, latencia estable (p95 entre 6
+y 10ms) y `docker stats` con CPU bajo 2% y memoria plana. Esto no significa "carga ilimitada": significa
+que este rango, con este volumen de datos y en esta máquina, no alcanza a estresar la API. De ahí dos
+cuellos de botella reales, distintos a los que se buscaban originalmente:
 
-Dato relevante para esta sección: en la corrida de `stress` (hasta 100 VUs) la API NO se rompió —
-0% de error y p95 se mantuvo en 7.69ms, prácticamente igual que en `load` (20 VUs). Eso no
-significa que no haya cuello de botella, significa que con este volumen de datos (reservas
-efímeras, sin dataset grande) y en esta máquina, 100 VUs no alcanza a estresar el contenedor.
-Antes de concluir "no hay cuello de botella", el equipo debería: (a) revisar `docker stats`
-durante una corrida para ver si CPU/RAM ya iban en aumento aunque la latencia no lo reflejara
-todavía, y (b) considerar correr `stress` con más VUs o `spike` para encontrar el punto real de
-quiebre — de lo contrario el hallazgo honesto es "no se encontró el límite dentro del rango
-probado", no "el sistema soporta carga ilimitada".]
+1. **El modelo de carga es el limitante, no la API** — el think time pone un techo bajo al throughput
+   por VU; encontrar el límite real requeriría un perfil sin think time o con 500–1000+ VUs.
+2. **El volumen de datos de prueba no representa un sistema con historial** — cada corrida arranca con
+   la base casi vacía (sin `SEED`); `GET /booking` con miles de registros acumulados es un escenario
+   no evaluado.
 
 ## 7. Propuestas de mejora priorizadas
 
-[2–4 acciones concretas y viables, en orden de prioridad — ej. escalar horizontalmente el
-contenedor, agregar cache de solo-lectura para `GET /booking`, revisar el manejo de tokens en
-memoria (`globalLogins`) como posible cuello de botella bajo alta concurrencia, etc.]
+1. **Repetir `stress`/`spike` con mayor concurrencia (500–1000 VUs) y sin think time**, para
+   efectivamente encontrar el punto de quiebre en vez de reportar "no se encontró" como resultado final.
+2. **Pre-cargar la base de datos con un volumen realista** (`SEED=true` o un script que inserte miles
+   de reservas) antes de correr `load`/`stress`, para medir el efecto del volumen de datos sobre
+   `GET /booking`, hoy no evaluado.
+3. **Recalibrar el SLO de throughput** a un número derivado del modelo de carga real del negocio (si
+   existiera), en vez de un valor genérico de referencia — o documentar explícitamente que el SLO de
+   150 TPS aplica a un escenario de tráfico puro, no al journey con think time aquí modelado.
+4. **Correr el generador de carga (k6) fuera de la misma máquina/contenedor que la API**, para eliminar
+   contención de recursos entre cliente y servidor como variable de confusión en corridas futuras con
+   mayor concurrencia.
 
 ## 8. Conclusiones
 
-[Cierre breve: ¿la API está lista para el nivel de carga modelado? ¿Qué se recomienda antes de
-aumentar tráfico real? Vincular con el debrief de EV-5.]
+Dentro del rango modelado (hasta 100 VUs sostenidos, picos de 150, 15 min de resistencia), Restful-Booker
+cumple todos los SLO salvo throughput —brecha explicada por el diseño del modelo de carga, no por el
+sistema—: 0% de errores, p95 máximo de 10.11ms contra un umbral de 800ms, sin señales de degradación
+sostenida. La API está lista para el nivel de tráfico aquí modelado. Antes de prometer más, se
+recomienda cerrar los dos puntos de la sección 6 (límite real con más concurrencia, y volumen de datos
+representativo) — temas para el debrief de EV-5.
 
 ---
 *Extensión objetivo: ~800 palabras (sin contar tablas). Evidencia de respaldo en `../results/`.*
