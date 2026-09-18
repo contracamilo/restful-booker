@@ -1,0 +1,10 @@
+# Trazas crudas de k6 (--out json=...) pesan varios MB/corrida (una línea por métrica por
+# request). Se quedan en disco como evidencia local / para adjuntar en la entrega de Moodle,
+# pero no se versionan en git para no inflar el historial del repo.
+# Los resúmenes (*_summary.json) y logs de consola sí se versionan: son livianos y
+# suficientes para reproducir las tablas del informe técnico.
+*.json
+!*_summary.json
+
+# El reporte HTML del dashboard (k6 --web-dashboard) y exports CSV SÍ se versionan — son
+# el entregable "reporte HTML/CSV" de la rúbrica y pesan poco (cientos de KB, no varios MB).
