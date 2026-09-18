@@ -9,5 +9,5 @@ spike_*.json
 soak_*.json
 !*_summary.json
 
-*.html
-*.csv
+# El reporte HTML del dashboard (k6 --web-dashboard) y exports CSV SÍ se versionan — son
+# el entregable "reporte HTML/CSV" de la rúbrica y pesan poco (cientos de KB, no varios MB).
