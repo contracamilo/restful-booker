@@ -115,10 +115,3 @@ master-plan/load-testing/
 └── report/
     └── informe_tecnico.md       ← informe técnico ~800 palabras (completar después de ejecutar)
 ```
-
-## Nota de equipo
-
-Por tiempo, Camilo hace esta actividad solo (con ayuda de Claude), cubriendo los 3 roles que
-propone el material del curso (Modelador/Scripter/Analista) en vez de repartirlos entre los tres.
-Karen y Richard: si alcanzan a aportar algo (una corrida en su máquina, revisar el informe antes de
-entregar), bienvenido, pero el plan no depende de eso para llegar a tiempo al 20 de septiembre.
