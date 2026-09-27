@@ -1,0 +1,59 @@
+{
+  "title": "Actividad 4 - Dashboard de rendimiento Restful-Booker",
+  "version": 2,
+  "generated_from": "Actividad 3 (master-plan/load-testing/results)",
+  "implementation": "Dashboard local HTML/JavaScript en un solo archivo, sin servidor ni dependencias externas (alternativa similar a Grafana). Los datos se insertan en index.html desde los CSV.",
+  "data_pipeline": [
+    "load-testing/results/*_summary.json, *_console.log y docker-stats/*.log (A3)",
+    "data/*.csv (consolidación A4)",
+    "scripts/build_dashboard_data.py",
+    "dashboard/index.html"
+  ],
+  "slos": {
+    "p95_ms": { "operator": "<", "value": 800 },
+    "p99_ms": { "operator": "<", "value": 1500 },
+    "error_rate_pct": { "operator": "<", "value": 1 },
+    "throughput_reference": {
+      "operator": ">=",
+      "value": 150,
+      "unit": "req/s",
+      "note": "Referencia del ejercicio de A3; el SLI medido es http_reqs rate (req/s)."
+    }
+  },
+  "thresholds": [
+    { "panel": "latency_percentiles", "metric": "p95_ms", "value": 800, "display": "Columna Estado SLO (✓/✗)" },
+    { "panel": "latency_percentiles", "metric": "p99_ms", "value": 1500, "display": "Columna Estado SLO (✓/✗)" },
+    { "panel": "p95_slo", "metric": "p95_ms", "value": 800, "display": "100 % del ancho de la barra" },
+    { "panel": "throughput", "metric": "req/s", "value": 150, "display": "Línea vertical naranja" },
+    { "panel": "resources", "metric": "cpu_pct", "value": 80, "display": "Línea horizontal discontinua roja", "note": "Umbral de saturación de referencia; no es un SLO." },
+    { "panel": "kpi_cards", "metric": "p95, p99, throughput, error", "display": "Estado por badge: verde para SLO cumplido, rojo para incumplimiento, naranja para throughput bajo referencia y neutro cuando cumple la referencia" }
+  ],
+  "panels": [
+    { "id": "kpi_cards", "title": "Tarjetas KPI del perfil seleccionado", "source": "data/kpis_rendimiento.csv", "units": ["ms", "req/s", "%"] },
+    { "id": "latency_percentiles", "title": "Latencia P50 / P95 / P99 por perfil", "source": "data/kpis_rendimiento.csv", "unit": "ms" },
+    { "id": "p95_slo", "title": "P95 frente al SLO de 800 ms", "source": "data/kpis_rendimiento.csv", "unit": "% del SLO" },
+    { "id": "throughput", "title": "Throughput por perfil", "source": "data/kpis_rendimiento.csv", "unit": "req/s" },
+    { "id": "resources", "title": "CPU y RAM del contenedor (breakpoint / soak)", "source": "data/recursos_breakpoint.csv, data/recursos_soak.csv", "axes": { "left": "CPU (%) 0-100", "right": "RAM (MiB) 0-300", "x": "Hora (docker stats, muestreo ~20 s)" } },
+    { "id": "network", "title": "Tráfico de red del contenedor", "source": "data/recursos_breakpoint.csv, data/recursos_soak.csv", "axes": { "left": "Entrada (MB acumulados)", "right": "Salida (MB acumulados)", "x": "Hora" } },
+    { "id": "io_soak", "title": "Block I/O durante soak", "source": "data/recursos_soak.csv", "unit": "MB" }
+  ],
+  "annotations": [
+    { "panel": "resources", "text": "Inicio de carga", "rule": "Primera muestra de docker stats" },
+    { "panel": "resources", "text": "Pico CPU", "rule": "Muestra con CPU máxima (breakpoint 11:44:05, 27,46 %; soak 11:18:45, 2,89 %)" },
+    { "panel": "resources", "text": "Fin de carga", "rule": "Primera muestra con CPU 0 % después del pico (breakpoint 11:46:38; soak 11:29:57)" },
+    { "panel": "network", "text": "Fin de carga", "rule": "Misma regla que en el panel de recursos" }
+  ],
+  "source_files": [
+    "../load-testing/results/*_summary.json",
+    "../load-testing/results/*_console.log",
+    "../load-testing/results/docker-stats/breakpoint_20260918_1139.log",
+    "../load-testing/results/docker-stats/soak_20260918_1115.log",
+    "../load-testing/config/environment.md"
+  ],
+  "limitations": [
+    "Entorno local Docker, no productivo.",
+    "La red es localhost y no representa latencia de Internet.",
+    "Breakpoint no registró Block I/O; el panel de I/O usa el log de soak.",
+    "El P99 de load (11,50 ms) proviene del informe técnico de A3 (Tabla 1 y Anexo C): la corrida load_20260915 no tiene console log y su summary.json no incluye p(99)."
+  ]
+}

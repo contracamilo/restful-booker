@@ -1,0 +1,1189 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Restful-Booker · Dashboard de rendimiento</title>
+<style>
+:root{
+  --bg:#F6F8FA;--panel:#FFFFFF;--ink:#111827;--ink2:#374151;--muted:#667085;--faint:#98A2B3;
+  --line:#E5E7EB;--grid:#F0F2F5;--track:#F2F4F7;
+  --blue:#2563EB;--violet:#7C3AED;
+  --green:#15803D;--amber:#D97706;--red:#DC2626;
+  --font:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);font-size:13px;line-height:1.45;-webkit-font-smoothing:antialiased}
+.num{font-variant-numeric:tabular-nums}
+code{font-family:var(--mono);font-size:.95em}
+
+/* Header */
+.topbar{background:var(--panel);border-bottom:1px solid var(--line)}
+.topbar-inner{max-width:1480px;margin:0 auto;padding:12px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:14px;min-width:0}
+.brand-mark{width:4px;align-self:stretch;background:var(--ink);border-radius:2px}
+.eyebrow{font-size:10.5px;font-weight:600;letter-spacing:.1em;color:var(--muted);text-transform:uppercase}
+.topbar h1{margin:1px 0 3px;font-size:22px;font-weight:650;letter-spacing:-.015em;line-height:1.15}
+.meta{font-size:12px;color:var(--muted);display:flex;flex-wrap:wrap;gap:0 10px}
+.meta span+span::before{content:"";display:inline-block;width:3px;height:3px;border-radius:50%;background:var(--faint);margin-right:10px;vertical-align:middle}
+.filters{display:flex;gap:8px;flex-wrap:wrap}
+.filter{display:flex;align-items:center;border:1px solid var(--line);border-radius:6px;background:var(--panel);height:32px;overflow:hidden}
+.filter label{font-size:11px;color:var(--muted);padding:0 8px;height:100%;display:flex;align-items:center;background:#FAFBFC;border-right:1px solid var(--line);white-space:nowrap}
+.filter select{border:0;background:transparent;font:inherit;font-size:12px;font-weight:600;color:var(--ink);outline:none;cursor:pointer;padding:0 6px;height:100%}
+.filter:focus-within{border-color:var(--blue);box-shadow:0 0 0 2px color-mix(in srgb,var(--blue) 15%,transparent)}
+
+/* Layout */
+.wrap{max-width:1480px;margin:0 auto;padding:14px 24px 6px}
+.grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:10px}
+.span-3{grid-column:span 3}.span-4{grid-column:span 4}.span-5{grid-column:span 5}.span-6{grid-column:span 6}.span-7{grid-column:span 7}.span-8{grid-column:span 8}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:6px;display:flex;flex-direction:column;min-width:0}
+.panel-head{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--line);min-height:52px}
+.panel-head h2{margin:0;font-size:15px;font-weight:600;letter-spacing:-.005em}
+.panel-head .sub{font-size:11.5px;color:var(--muted);margin-top:1px}
+.panel-head .aside{font-size:11px;color:var(--muted);white-space:nowrap}
+.panel-body{padding:12px 14px;flex:1}
+.panel-foot{padding:7px 14px 9px;font-size:10.5px;color:var(--faint);display:flex;flex-direction:column;gap:2px;border-top:1px solid var(--grid)}
+.panel-foot .src{font-family:var(--mono);font-size:10px;overflow-wrap:anywhere}
+
+/* Badges */
+.badge{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:600;border-radius:999px;padding:1px 8px;white-space:nowrap;border:1px solid;line-height:1.6}
+.badge::before{content:"";width:5px;height:5px;border-radius:50%;background:currentColor}
+.b-ok{background:color-mix(in srgb,var(--green) 6%,#fff);border-color:color-mix(in srgb,var(--green) 22%,#fff);color:var(--green)}
+.b-ref{background:color-mix(in srgb,var(--amber) 7%,#fff);border-color:color-mix(in srgb,var(--amber) 30%,#fff);color:color-mix(in srgb,var(--amber) 78%,#000)}
+.b-bad{background:color-mix(in srgb,var(--red) 6%,#fff);border-color:color-mix(in srgb,var(--red) 25%,#fff);color:var(--red)}
+.b-neutral{background:#FAFBFC;border-color:var(--line);color:var(--ink2)}
+
+/* KPI cards */
+.kpi{padding:10px 14px 11px}
+.kpi .k{font-size:10.5px;font-weight:600;letter-spacing:.08em;color:var(--muted);text-transform:uppercase}
+.kpi .v{font-size:28px;font-weight:650;letter-spacing:-.02em;margin:3px 0 4px;line-height:1.1;color:var(--ink)}
+.kpi .v small{font-size:13px;font-weight:500;color:var(--muted);margin-left:4px;letter-spacing:0}
+.kpi .row{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.kpi .t{font-size:11px;color:var(--muted)}
+
+/* Latency table */
+.lat{width:100%;border-collapse:collapse;table-layout:fixed}
+.lat th{font-size:10.5px;font-weight:600;color:var(--muted);text-align:left;padding:0 14px 7px 0;letter-spacing:.06em;text-transform:uppercase;border-bottom:1px solid var(--line)}
+.lat td{padding:7px 14px 7px 0;border-bottom:1px solid var(--grid);vertical-align:middle}
+.lat tr:last-child td{border-bottom:0}
+.lat .prof{width:96px;font-weight:600}
+.lat .st{width:86px;text-align:right;padding-right:0}
+.cell-val{font-size:12px;font-weight:600}
+.cell-val span{color:var(--muted);font-weight:400;margin-left:3px}
+.mini{height:3px;background:var(--track);border-radius:2px;margin-top:5px;overflow:hidden}
+.mini i{display:block;height:100%;border-radius:2px}
+.c-p50{background:var(--faint)}.c-p95{background:var(--blue)}.c-p99{background:var(--violet)}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:11px;color:var(--muted)}
+.sw{display:inline-block;width:10px;height:2px;border-radius:1px;margin-right:5px;vertical-align:middle}
+.sw-dash{display:inline-block;width:12px;height:0;border-top:1.5px dashed;margin-right:5px;vertical-align:middle}
+
+/* P95 vs SLO */
+.slo-row{padding:8px 0}
+.slo-row+.slo-row{border-top:1px solid var(--grid)}
+.slo-top{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.slo-top b{font-size:12px;font-weight:600}
+.slo-top .val{font-size:12px;font-weight:600}
+.slo-top .pct{font-size:11px;color:var(--muted);margin-left:8px;font-weight:400}
+.track{height:3px;background:var(--track);border-radius:2px;margin-top:6px;overflow:hidden}
+.fill{height:100%;background:var(--blue);border-radius:2px;min-width:3px}
+
+/* Throughput */
+#panelThroughput .panel-body{display:flex}
+.tp{position:relative;padding-top:18px;flex:1;display:flex;flex-direction:column;justify-content:space-around}
+.tp-row{display:grid;grid-template-columns:78px 1fr 92px;align-items:center;gap:12px;padding:5px 0}
+.tp-row b{font-size:12px;font-weight:600}
+.tp-row .val{text-align:right;font-size:12px;font-weight:600}
+.tp-row .val span{color:var(--muted);font-weight:400}
+.tp-track{height:8px;background:var(--track);border-radius:2px;position:relative}
+.tp-fill{height:100%;background:var(--blue);border-radius:2px}
+.tp-ref{position:absolute;top:0;bottom:0;border-left:1.5px dashed var(--amber);pointer-events:none}
+.tp-ref span{position:absolute;top:0;left:6px;font-size:10.5px;color:color-mix(in srgb,var(--amber) 78%,#000);white-space:nowrap;font-weight:600}
+
+/* Charts */
+.chart-legend{display:flex;gap:14px;flex-wrap:wrap;font-size:11px;color:var(--muted);padding:10px 14px 0}
+.chart{height:290px;padding:2px 6px 0}
+.chart.sm{height:250px}
+canvas{width:100%;height:100%;display:block}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border-top:1px solid var(--line)}
+.stat{padding:7px 14px;border-right:1px solid var(--grid)}
+.stat:last-child{border-right:0}
+.stat .k{font-size:10px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;font-weight:600}
+.stat .v{font-size:15px;font-weight:650;margin-top:1px}
+.stat .v small{font-size:11px;color:var(--muted);font-weight:400}
+
+/* Block I/O */
+.io{width:100%;border-collapse:collapse}
+.io th{font-size:10.5px;font-weight:600;color:var(--muted);text-align:left;padding:0 8px 7px 0;letter-spacing:.06em;text-transform:uppercase;border-bottom:1px solid var(--line)}
+.io td{padding:8px 8px 8px 0;border-bottom:1px solid var(--grid);font-size:12px}
+.io td:first-child{font-weight:600}
+.io tr:last-child td{border-bottom:0}
+.io .r{text-align:right;padding-right:0}
+.delta{font-size:11.5px;font-weight:600;color:var(--ink2)}
+
+/* Footer */
+footer{max-width:1480px;margin:0 auto;padding:8px 24px 20px;font-size:10.5px;color:var(--faint);display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+footer b{color:var(--muted);font-weight:600}
+
+@media(max-width:1100px){
+  .span-3{grid-column:span 6}
+  .span-4,.span-5,.span-6,.span-7,.span-8{grid-column:span 12}
+}
+@media(max-width:640px){
+  .topbar-inner,.wrap,footer{padding-left:16px;padding-right:16px}
+  .span-3{grid-column:span 12}
+  .lat .prof{width:70px}.lat .st{width:70px}
+  .lat th:nth-child(2),.lat td:nth-child(2){display:none}
+  .stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .stat:nth-child(2){border-right:0}
+  .panel-head{flex-wrap:wrap}
+}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true"></div>
+      <div>
+        <div class="eyebrow">Restful-Booker</div>
+        <h1>Dashboard de rendimiento</h1>
+        <div class="meta"><span>Actividad 4 · Calidad de Software II</span><span>Docker local</span><span>k6 + docker stats</span><span>5 perfiles</span></div>
+      </div>
+    </div>
+    <div class="filters">
+      <div class="filter"><label for="profileSelect">Perfil</label><select id="profileSelect"></select></div>
+      <div class="filter"><label for="resourceSelect">Recursos</label>
+        <select id="resourceSelect"><option value="breakpoint">Breakpoint (0→1000 VUs)</option><option value="soak">Soak (15 VUs, 15 min)</option></select>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="grid">
+    <section class="panel kpi span-3" aria-label="P95">
+      <div class="k">Latencia P95</div>
+      <div class="v num" id="cardP95">—</div>
+      <div class="row"><span class="t">SLO &lt; 800 ms</span><span id="badgeP95"></span></div>
+    </section>
+    <section class="panel kpi span-3" aria-label="P99">
+      <div class="k">Latencia P99</div>
+      <div class="v num" id="cardP99">—</div>
+      <div class="row"><span class="t">SLO &lt; 1500 ms</span><span id="badgeP99"></span></div>
+    </section>
+    <section class="panel kpi span-3" aria-label="Throughput">
+      <div class="k">Throughput</div>
+      <div class="v num" id="cardThroughput">—</div>
+      <div class="row"><span class="t">Referencia ≥ 150 req/s</span><span id="badgeThroughput"></span></div>
+    </section>
+    <section class="panel kpi span-3" aria-label="Tasa de error">
+      <div class="k">Tasa de error</div>
+      <div class="v num" id="cardError">—</div>
+      <div class="row"><span class="t">SLO &lt; 1 %</span><span id="badgeError"></span></div>
+    </section>
+
+    <section class="panel span-8" id="panelLatency">
+      <div class="panel-head">
+        <div><h2>Percentiles de latencia</h2><div class="sub">P95 &lt; 800 ms · P99 &lt; 1500 ms · <code>http_req_duration</code> en ms</div></div>
+        <div class="legend"><span><i class="sw c-p50"></i>P50</span><span><i class="sw c-p95"></i>P95</span><span><i class="sw c-p99"></i>P99</span></div>
+      </div>
+      <div class="panel-body">
+        <table class="lat">
+          <thead><tr><th class="prof">Perfil</th><th>P50</th><th>P95</th><th>P99</th><th class="st">Estado</th></tr></thead>
+          <tbody id="latencyGrid"></tbody>
+        </table>
+      </div>
+      <div class="panel-foot">
+        <span id="p99Note"></span>
+        <span class="src">Fuente · data/kpis_rendimiento.csv ← load-testing/results/*_summary.json (P50, P95); *_console.log (P99 de stress, spike, soak y breakpoint); Informe técnico A3 – Tabla 1 y Anexo C (P99 de load)</span>
+      </div>
+    </section>
+
+    <section class="panel span-4" id="panelSlo">
+      <div class="panel-head">
+        <div><h2>P95 vs SLO</h2><div class="sub">% del SLO consumido por perfil</div></div>
+        <span class="aside">SLO 800 ms</span>
+      </div>
+      <div class="panel-body" id="sloList"></div>
+      <div class="panel-foot"><span id="sloNote"></span><span class="src">Fuente · data/kpis_rendimiento.csv</span></div>
+    </section>
+
+    <section class="panel span-5" id="panelThroughput">
+      <div class="panel-head">
+        <div><h2>Throughput</h2><div class="sub">Solicitudes por segundo · <code>http_reqs rate</code></div></div>
+      </div>
+      <div class="panel-body"><div class="tp" id="throughputList"></div></div>
+      <div class="panel-foot"><span id="throughputNote"></span><span class="src">Fuente · data/kpis_rendimiento.csv</span></div>
+    </section>
+
+    <section class="panel span-7" id="panelResources">
+      <div class="panel-head">
+        <div><h2>CPU / RAM</h2><div class="sub" id="resourceTitle"></div></div>
+      </div>
+      <div class="chart-legend">
+        <span><i class="sw" style="background:var(--blue)"></i>CPU % (eje izq.)</span>
+        <span><i class="sw" style="background:var(--violet)"></i>RAM MiB (eje der.)</span>
+        <span><i class="sw-dash" style="border-color:var(--red)"></i>Umbral CPU 80 % (referencia, no SLO)</span>
+        <span><i class="sw-dash" style="border-color:var(--faint)"></i>Anotaciones</span>
+      </div>
+      <div class="chart"><canvas id="resourceCanvas" role="img" aria-label="Serie temporal de CPU y RAM del contenedor"></canvas></div>
+      <div class="stats" id="resourceStats"></div>
+      <div class="panel-foot"><span id="resourceAnnotation"></span><span class="src" id="resourceSource"></span></div>
+    </section>
+
+    <section class="panel span-6" id="panelNetwork">
+      <div class="panel-head">
+        <div><h2>Network I/O</h2><div class="sub">Tráfico del contenedor · MB acumulados</div></div>
+      </div>
+      <div class="chart-legend">
+        <span><i class="sw" style="background:var(--blue)"></i>Entrada MB (eje izq.)</span>
+        <span><i class="sw" style="background:var(--violet)"></i>Salida MB (eje der.)</span>
+      </div>
+      <div class="chart sm"><canvas id="networkCanvas" role="img" aria-label="Serie temporal de red acumulada"></canvas></div>
+      <div class="panel-foot"><span class="num" id="networkTag"></span><span id="networkNote"></span><span class="src" id="networkSource"></span></div>
+    </section>
+
+    <section class="panel span-6" id="panelIo">
+      <div class="panel-head">
+        <div><h2>Block I/O</h2><div class="sub">Soak · inicio y fin del periodo activo</div></div>
+      </div>
+      <div class="panel-body">
+        <table class="io">
+          <thead><tr><th>Métrica</th><th>Inicio</th><th>Fin</th><th class="r">Estado</th></tr></thead>
+          <tbody id="ioTable"></tbody>
+        </table>
+      </div>
+      <div class="panel-foot">
+        <span>Breakpoint no registró Block I/O; este panel utiliza la evidencia del soak.</span>
+        <span class="src">Fuente · data/recursos_soak.csv ← load-testing/results/docker-stats/soak_20260918_1115.log</span>
+      </div>
+    </section>
+  </div>
+</main>
+
+<footer id="footer"></footer>
+
+<script>
+/* BEGIN DATA: generado por scripts/build_dashboard_data.py, no editar a mano */
+window.DASHBOARD_DATA = {
+ "generatedAt": "2026-09-27 01:58",
+ "sources": [
+  "data/kpis_rendimiento.csv",
+  "data/recursos_breakpoint.csv",
+  "data/recursos_soak.csv"
+ ],
+ "slo": {
+  "p95": 800,
+  "p99": 1500,
+  "error": 1,
+  "throughput": 150,
+  "cpu_ref": 80
+ },
+ "kpis": [
+  {
+   "profile": "load",
+   "vus": 20,
+   "duration": "5 min",
+   "p50": 2.34,
+   "p95": 7.45,
+   "p99": 11.5,
+   "throughput": 9.3,
+   "error": 0.0,
+   "p99Source": "Informe técnico A3 – Tabla 1 y Anexo C (corrida load_20260915 sin console log)"
+  },
+  {
+   "profile": "stress",
+   "vus": 100,
+   "duration": "11 min",
+   "p50": 2.32,
+   "p95": 7.69,
+   "p99": 12.84,
+   "throughput": 32.79,
+   "error": 0.0,
+   "p99Source": "stress_20260915_1632_console.log"
+  },
+  {
+   "profile": "spike",
+   "vus": 150,
+   "duration": "2 min",
+   "p50": 2.74,
+   "p95": 5.98,
+   "p99": 9.9,
+   "throughput": 51.89,
+   "error": 0.0,
+   "p99Source": "spike_20260918_1111_console.log"
+  },
+  {
+   "profile": "soak",
+   "vus": 15,
+   "duration": "15 min",
+   "p50": 3.6,
+   "p95": 10.11,
+   "p99": 13.98,
+   "throughput": 8.69,
+   "error": 0.0,
+   "p99Source": "soak_20260918_1114_console.log"
+  },
+  {
+   "profile": "breakpoint",
+   "vus": 1000,
+   "duration": "6m44s",
+   "p50": 1.9,
+   "p95": 8.09,
+   "p99": 12.37,
+   "throughput": 356.58,
+   "error": 0.0,
+   "p99Source": "breakpoint_20260918_1139_console.log"
+  }
+ ],
+ "resources": {
+  "breakpoint": [
+   {
+    "time": "11:39:45",
+    "cpu": 4.5,
+    "ram": 113.4,
+    "netIn": 6.9,
+    "netOut": 8.72,
+    "blockRead": null,
+    "blockWrite": null
+   },
+   {
+    "time": "11:40:08",
+    "cpu": 11.87,
+    "ram": 139.5,
+    "netIn": 7.18,
+    "netOut": 9.07,
+    "blockRead": null,
+    "blockWrite": null
+   },
+   {
+    "time": "11:40:29",
+    "cpu": 16.21,
+    "ram": 145.0,
+    "netIn": 7.75,
+    "netOut": 9.81,
+    "blockRead": null,
+    "blockWrite": null
+   },
+   {
+    "time": "11:40:51",
+    "cpu": 20.57,
+    "ram": 147.1,
+    "netIn": 8.58,
+    "netOut": 10.9,
+    "blockRead": null,
+    "blockWrite": null
+   },
+   {
+    "time": "11:41:12",
+    "cpu": 23.69,
+    "ram": 149.0,
+    "netIn": 9.71,
+    "netOut": 12.5,
+    "blockRead": null,
+    "blockWrite": null
+   },
+   {
+    "time": "11:41:34",
+    "cpu": 22.59,
+    "ram": 150.4,
+    "netIn": 11.1,
+    "netOut": 14.5,
+    "blockRead": null,
+    "blockWrite": null
+   },
+   {
+    "time": "11:41:55",
+    "cpu": 24.12,
+    "ram": 152.1,
+    "netIn": 12.9,
+    "netOut": 17.0,
+    "blockRead": null,
+    "blockWrite": null
+   },
+   {
+    "time": "11:42:18",
+    "cpu": 22.42,
+    "ram": 156.9,
+    "netIn": 14.9,
+    "netOut": 20.1,
+    "blockRead": null,
+    "blockWrite": null
+   },
+   {
+    "time": "11:42:39",
+    "cpu": 25.5,
+    "ram": 187.0,
+    "netIn": 17.5,
+    "netOut": 24.1,
+    "blockRead": null,
+    "blockWrite": null
+   },
+   {
+    "time": "11:43:01",
+    "cpu": 25.56,
+    "ram": 190.0,
+    "netIn": 20.5,
+    "netOut": 29.1,
+    "blockRead": null,
+    "blockWrite": null
+   },
+   {
+    "time": "11:43:22",
+    "cpu": 26.48,
+    "ram": 196.5,
+    "netIn": 24.0,
+    "netOut": 35.0,
+    "blockRead": null,
+    "blockWrite": null
+   },
+   {
+    "time": "11:43:44",
+    "cpu": 22.77,
+    "ram": 199.0,
+    "netIn": 27.9,
+    "netOut": 41.9,
+    "blockRead": null,
+    "blockWrite": null
+   },
+   {
+    "time": "11:44:05",
+    "cpu": 27.46,
+    "ram": 205.6,
+    "netIn": 32.0,
+    "netOut": 49.3,
+    "blockRead": null,
+    "blockWrite": null
+   },
+   {
+    "time": "11:44:28",
+    "cpu": 25.74,
+    "ram": 203.4,
+    "netIn": 35.9,
+    "netOut": 56.3,
+    "blockRead": null,
+    "blockWrite": null
+   },
+   {
+    "time": "11:44:49",
+    "cpu": 22.18,
+    "ram": 204.2,
+    "netIn": 39.9,
+    "netOut": 63.4,
+    "blockRead": null,
+    "blockWrite": null
+   },
+   {
+    "time": "11:45:11",
+    "cpu": 22.12,
+    "ram": 204.9,
+    "netIn": 43.9,
+    "netOut": 70.5,
+    "blockRead": null,
+    "blockWrite": null
+   },
+   {
+    "time": "11:45:32",
+    "cpu": 20.15,
+    "ram": 205.4,
+    "netIn": 47.9,
+    "netOut": 77.6,
+    "blockRead": null,
+    "blockWrite": null
+   },
+   {
+    "time": "11:45:54",
+    "cpu": 14.48,
+    "ram": 205.7,
+    "netIn": 51.4,
+    "netOut": 83.6,
+    "blockRead": null,
+    "blockWrite": null
+   },
+   {
+    "time": "11:46:15",
+    "cpu": 3.17,
+    "ram": 203.7,
+    "netIn": 52.6,
+    "netOut": 85.2,
+    "blockRead": null,
+    "blockWrite": null
+   },
+   {
+    "time": "11:46:38",
+    "cpu": 0.0,
+    "ram": 111.8,
+    "netIn": 52.6,
+    "netOut": 85.2,
+    "blockRead": null,
+    "blockWrite": null
+   },
+   {
+    "time": "11:46:59",
+    "cpu": 0.0,
+    "ram": 111.7,
+    "netIn": 52.6,
+    "netOut": 85.2,
+    "blockRead": null,
+    "blockWrite": null
+   },
+   {
+    "time": "11:47:21",
+    "cpu": 0.0,
+    "ram": 111.7,
+    "netIn": 52.6,
+    "netOut": 85.2,
+    "blockRead": null,
+    "blockWrite": null
+   },
+   {
+    "time": "11:47:42",
+    "cpu": 0.0,
+    "ram": 111.7,
+    "netIn": 52.6,
+    "netOut": 85.2,
+    "blockRead": null,
+    "blockWrite": null
+   },
+   {
+    "time": "11:48:04",
+    "cpu": 0.0,
+    "ram": 111.7,
+    "netIn": 52.6,
+    "netOut": 85.2,
+    "blockRead": null,
+    "blockWrite": null
+   },
+   {
+    "time": "11:48:25",
+    "cpu": 0.0,
+    "ram": 111.7,
+    "netIn": 52.6,
+    "netOut": 85.2,
+    "blockRead": null,
+    "blockWrite": null
+   }
+  ],
+  "soak": [
+   {
+    "time": "11:15:09",
+    "cpu": 1.12,
+    "ram": 116.8,
+    "netIn": 2.31,
+    "netOut": 2.95,
+    "blockRead": 66.5,
+    "blockWrite": 0.0041
+   },
+   {
+    "time": "11:15:30",
+    "cpu": 1.64,
+    "ram": 116.4,
+    "netIn": 2.37,
+    "netOut": 3.02,
+    "blockRead": 66.5,
+    "blockWrite": 0.0041
+   },
+   {
+    "time": "11:15:52",
+    "cpu": 0.98,
+    "ram": 117.2,
+    "netIn": 2.42,
+    "netOut": 3.09,
+    "blockRead": 66.5,
+    "blockWrite": 0.0041
+   },
+   {
+    "time": "11:16:13",
+    "cpu": 1.28,
+    "ram": 117.3,
+    "netIn": 2.48,
+    "netOut": 3.17,
+    "blockRead": 66.5,
+    "blockWrite": 0.0041
+   },
+   {
+    "time": "11:16:35",
+    "cpu": 1.24,
+    "ram": 118.6,
+    "netIn": 2.54,
+    "netOut": 3.24,
+    "blockRead": 66.5,
+    "blockWrite": 0.0041
+   },
+   {
+    "time": "11:16:57",
+    "cpu": 0.89,
+    "ram": 118.3,
+    "netIn": 2.6,
+    "netOut": 3.31,
+    "blockRead": 66.5,
+    "blockWrite": 0.0041
+   },
+   {
+    "time": "11:17:18",
+    "cpu": 1.54,
+    "ram": 116.7,
+    "netIn": 2.66,
+    "netOut": 3.39,
+    "blockRead": 66.5,
+    "blockWrite": 0.0041
+   },
+   {
+    "time": "11:17:40",
+    "cpu": 1.56,
+    "ram": 117.1,
+    "netIn": 2.72,
+    "netOut": 3.46,
+    "blockRead": 66.5,
+    "blockWrite": 0.0041
+   },
+   {
+    "time": "11:18:02",
+    "cpu": 1.32,
+    "ram": 117.1,
+    "netIn": 2.78,
+    "netOut": 3.54,
+    "blockRead": 66.5,
+    "blockWrite": 0.0041
+   },
+   {
+    "time": "11:18:23",
+    "cpu": 0.88,
+    "ram": 117.1,
+    "netIn": 2.84,
+    "netOut": 3.61,
+    "blockRead": 66.5,
+    "blockWrite": 0.0041
+   },
+   {
+    "time": "11:18:45",
+    "cpu": 2.89,
+    "ram": 117.3,
+    "netIn": 2.9,
+    "netOut": 3.68,
+    "blockRead": 66.5,
+    "blockWrite": 0.0041
+   },
+   {
+    "time": "11:19:07",
+    "cpu": 0.69,
+    "ram": 117.5,
+    "netIn": 2.96,
+    "netOut": 3.75,
+    "blockRead": 66.5,
+    "blockWrite": 0.0041
+   },
+   {
+    "time": "11:19:29",
+    "cpu": 1.2,
+    "ram": 117.6,
+    "netIn": 3.02,
+    "netOut": 3.82,
+    "blockRead": 66.5,
+    "blockWrite": 0.0041
+   },
+   {
+    "time": "11:19:50",
+    "cpu": 1.59,
+    "ram": 119.2,
+    "netIn": 3.08,
+    "netOut": 3.9,
+    "blockRead": 66.5,
+    "blockWrite": 0.0041
+   },
+   {
+    "time": "11:20:12",
+    "cpu": 1.07,
+    "ram": 119.1,
+    "netIn": 3.14,
+    "netOut": 3.97,
+    "blockRead": 66.5,
+    "blockWrite": 0.0041
+   },
+   {
+    "time": "11:20:33",
+    "cpu": 1.06,
+    "ram": 119.2,
+    "netIn": 3.2,
+    "netOut": 4.04,
+    "blockRead": 66.5,
+    "blockWrite": 0.0041
+   },
+   {
+    "time": "11:20:55",
+    "cpu": 1.25,
+    "ram": 119.3,
+    "netIn": 3.26,
+    "netOut": 4.12,
+    "blockRead": 66.5,
+    "blockWrite": 0.0041
+   },
+   {
+    "time": "11:21:17",
+    "cpu": 0.42,
+    "ram": 119.2,
+    "netIn": 3.31,
+    "netOut": 4.19,
+    "blockRead": 66.5,
+    "blockWrite": 0.0041
+   },
+   {
+    "time": "11:21:39",
+    "cpu": 1.41,
+    "ram": 120.0,
+    "netIn": 3.37,
+    "netOut": 4.26,
+    "blockRead": 66.5,
+    "blockWrite": 0.0041
+   },
+   {
+    "time": "11:22:00",
+    "cpu": 1.66,
+    "ram": 119.9,
+    "netIn": 3.44,
+    "netOut": 4.34,
+    "blockRead": 66.5,
+    "blockWrite": 0.0041
+   },
+   {
+    "time": "11:22:22",
+    "cpu": 1.83,
+    "ram": 120.5,
+    "netIn": 3.49,
+    "netOut": 4.41,
+    "blockRead": 66.5,
+    "blockWrite": 0.0041
+   },
+   {
+    "time": "11:22:43",
+    "cpu": 2.57,
+    "ram": 119.9,
+    "netIn": 3.55,
+    "netOut": 4.48,
+    "blockRead": 66.5,
+    "blockWrite": 0.0041
+   },
+   {
+    "time": "11:23:05",
+    "cpu": 1.74,
+    "ram": 119.3,
+    "netIn": 3.61,
+    "netOut": 4.55,
+    "blockRead": 66.5,
+    "blockWrite": 0.0041
+   },
+   {
+    "time": "11:23:27",
+    "cpu": 1.16,
+    "ram": 119.2,
+    "netIn": 3.66,
+    "netOut": 4.62,
+    "blockRead": 66.5,
+    "blockWrite": 0.0041
+   },
+   {
+    "time": "11:23:49",
+    "cpu": 1.2,
+    "ram": 119.5,
+    "netIn": 3.73,
+    "netOut": 4.7,
+    "blockRead": 66.5,
+    "blockWrite": 0.0041
+   },
+   {
+    "time": "11:24:10",
+    "cpu": 1.3,
+    "ram": 119.7,
+    "netIn": 3.79,
+    "netOut": 4.77,
+    "blockRead": 66.5,
+    "blockWrite": 0.0041
+   },
+   {
+    "time": "11:24:32",
+    "cpu": 1.49,
+    "ram": 119.8,
+    "netIn": 3.85,
+    "netOut": 4.85,
+    "blockRead": 66.5,
+    "blockWrite": 0.0041
+   },
+   {
+    "time": "11:24:53",
+    "cpu": 2.4,
+    "ram": 119.9,
+    "netIn": 3.91,
+    "netOut": 4.92,
+    "blockRead": 66.5,
+    "blockWrite": 0.0041
+   },
+   {
+    "time": "11:25:15",
+    "cpu": 1.14,
+    "ram": 119.2,
+    "netIn": 3.97,
+    "netOut": 5.0,
+    "blockRead": 66.5,
+    "blockWrite": 0.0041
+   },
+   {
+    "time": "11:25:37",
+    "cpu": 2.17,
+    "ram": 119.9,
+    "netIn": 4.03,
+    "netOut": 5.07,
+    "blockRead": 66.5,
+    "blockWrite": 0.0041
+   },
+   {
+    "time": "11:25:59",
+    "cpu": 1.49,
+    "ram": 119.7,
+    "netIn": 4.09,
+    "netOut": 5.14,
+    "blockRead": 66.5,
+    "blockWrite": 0.0041
+   },
+   {
+    "time": "11:26:20",
+    "cpu": 1.39,
+    "ram": 119.6,
+    "netIn": 4.15,
+    "netOut": 5.22,
+    "blockRead": 66.5,
+    "blockWrite": 0.0041
+   },
+   {
+    "time": "11:26:42",
+    "cpu": 1.17,
+    "ram": 119.5,
+    "netIn": 4.21,
+    "netOut": 5.29,
+    "blockRead": 66.5,
+    "blockWrite": 0.0041
+   },
+   {
+    "time": "11:27:03",
+    "cpu": 1.41,
+    "ram": 119.4,
+    "netIn": 4.27,
+    "netOut": 5.37,
+    "blockRead": 66.5,
+    "blockWrite": 0.0041
+   },
+   {
+    "time": "11:27:25",
+    "cpu": 1.16,
+    "ram": 119.3,
+    "netIn": 4.33,
+    "netOut": 5.44,
+    "blockRead": 66.5,
+    "blockWrite": 0.0041
+   },
+   {
+    "time": "11:27:47",
+    "cpu": 1.26,
+    "ram": 119.3,
+    "netIn": 4.39,
+    "netOut": 5.51,
+    "blockRead": 66.5,
+    "blockWrite": 0.0041
+   },
+   {
+    "time": "11:28:09",
+    "cpu": 1.59,
+    "ram": 119.3,
+    "netIn": 4.45,
+    "netOut": 5.59,
+    "blockRead": 66.5,
+    "blockWrite": 0.0041
+   },
+   {
+    "time": "11:28:30",
+    "cpu": 0.77,
+    "ram": 119.2,
+    "netIn": 4.51,
+    "netOut": 5.66,
+    "blockRead": 66.5,
+    "blockWrite": 0.0041
+   },
+   {
+    "time": "11:28:52",
+    "cpu": 1.36,
+    "ram": 119.7,
+    "netIn": 4.57,
+    "netOut": 5.73,
+    "blockRead": 66.5,
+    "blockWrite": 0.0041
+   },
+   {
+    "time": "11:29:13",
+    "cpu": 1.09,
+    "ram": 119.7,
+    "netIn": 4.64,
+    "netOut": 5.81,
+    "blockRead": 66.5,
+    "blockWrite": 0.0041
+   },
+   {
+    "time": "11:29:35",
+    "cpu": 0.55,
+    "ram": 119.8,
+    "netIn": 4.68,
+    "netOut": 5.87,
+    "blockRead": 66.5,
+    "blockWrite": 0.0041
+   },
+   {
+    "time": "11:29:57",
+    "cpu": 0.0,
+    "ram": 119.6,
+    "netIn": 4.68,
+    "netOut": 5.87,
+    "blockRead": 66.5,
+    "blockWrite": 0.0041
+   },
+   {
+    "time": "11:30:19",
+    "cpu": 0.0,
+    "ram": 119.6,
+    "netIn": 4.68,
+    "netOut": 5.87,
+    "blockRead": 66.5,
+    "blockWrite": 0.0041
+   },
+   {
+    "time": "11:30:40",
+    "cpu": 0.0,
+    "ram": 119.6,
+    "netIn": 4.68,
+    "netOut": 5.87,
+    "blockRead": 66.5,
+    "blockWrite": 0.0041
+   },
+   {
+    "time": "11:31:02",
+    "cpu": 0.0,
+    "ram": 119.6,
+    "netIn": 4.68,
+    "netOut": 5.87,
+    "blockRead": 66.5,
+    "blockWrite": 0.0041
+   }
+  ]
+ }
+};
+/* END DATA */
+</script>
+<script>
+const D = window.DASHBOARD_DATA;
+const kpis = D.kpis, resources = D.resources, SLO = D.slo;
+const fmt = (n, d = 2) => n.toLocaleString('es-CO', { minimumFractionDigits: d, maximumFractionDigits: d });
+const badge = (cls, text) => '<span class="badge ' + cls + '">' + text + '</span>';
+const C = { ink: '#111827', ink2: '#374151', muted: '#667085', faint: '#98A2B3', grid: '#EEF0F3', axis: '#D0D5DD', blue: '#2563EB', violet: '#7C3AED', red: '#DC2626', font: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif' };
+
+/* ---------- KPI cards ---------- */
+const profileSelect = document.getElementById('profileSelect');
+kpis.forEach(k => { const o = document.createElement('option'); o.value = k.profile; o.textContent = k.profile + ' (' + k.vus + ' VUs máx.)'; profileSelect.appendChild(o); });
+profileSelect.value = 'load';
+function setCard(id, value, unit, badgeHtml, badgeId) {
+  document.getElementById(id).innerHTML = value + '<small>' + unit + '</small>';
+  document.getElementById(badgeId).innerHTML = badgeHtml;
+}
+function updateCards() {
+  const k = kpis.find(x => x.profile === profileSelect.value);
+  const slo = ok => ok ? badge('b-ok', 'SLO OK') : badge('b-bad', 'Incumple');
+  setCard('cardP95', fmt(k.p95), 'ms', slo(k.p95 < SLO.p95), 'badgeP95');
+  setCard('cardP99', fmt(k.p99), 'ms', slo(k.p99 < SLO.p99), 'badgeP99');
+  setCard('cardThroughput', fmt(k.throughput), 'req/s', k.throughput >= SLO.throughput ? badge('b-neutral', 'Cumple referencia') : badge('b-ref', 'Bajo referencia'), 'badgeThroughput');
+  setCard('cardError', fmt(k.error), '%', slo(k.error < SLO.error), 'badgeError');
+}
+profileSelect.addEventListener('change', updateCards);
+
+/* ---------- Latency percentiles ---------- */
+function renderLatency() {
+  const max = Math.max(...kpis.map(k => k.p99)) * 1.08;
+  const cell = (cls, v) => '<td><div class="cell-val num">' + fmt(v) + '<span>ms</span></div><div class="mini" title="' + fmt(v) + ' ms"><i class="' + cls + '" style="width:' + Math.max(3, v / max * 100) + '%"></i></div></td>';
+  document.getElementById('latencyGrid').innerHTML = kpis.map(k => {
+    const ok = k.p95 < SLO.p95 && k.p99 < SLO.p99;
+    return '<tr><td class="prof">' + k.profile + '</td>' + cell('c-p50', k.p50) + cell('c-p95', k.p95) + cell('c-p99', k.p99) +
+      '<td class="st">' + (ok ? badge('b-ok', 'SLO OK') : badge('b-bad', 'Incumple')) + '</td></tr>';
+  }).join('');
+  const load = kpis.find(k => k.profile === 'load');
+  document.getElementById('p99Note').textContent = 'Nota de trazabilidad: el P99 de load (' + fmt(load.p99) + ' ms) proviene del ' + load.p99Source + '; los P99 de stress, spike, soak y breakpoint provienen del console log de cada corrida.';
+}
+
+/* ---------- P95 vs SLO ---------- */
+function renderSlo() {
+  document.getElementById('sloList').innerHTML = kpis.map(k => {
+    const pct = k.p95 / SLO.p95 * 100;
+    return '<div class="slo-row"><div class="slo-top"><b>' + k.profile + '</b><span class="num"><span class="val">' + fmt(k.p95) + ' ms</span><span class="pct">' + fmt(pct) + ' % del SLO</span></span></div>' +
+      '<div class="track"><div class="fill" style="width:' + Math.max(0.6, pct) + '%"></div></div></div>';
+  }).join('');
+  const worst = kpis.reduce((a, b) => b.p95 > a.p95 ? b : a);
+  document.getElementById('sloNote').textContent = 'Peor caso: ' + fmt(worst.p95) + ' ms (' + worst.profile + '), ' + fmt(worst.p95 / SLO.p95 * 100) + ' % del SLO.';
+}
+
+/* ---------- Throughput ---------- */
+function renderThroughput() {
+  const max = Math.ceil(Math.max(...kpis.map(k => k.throughput)) / 100) * 100 + 50, thresholdPct = SLO.throughput / max * 100;
+  const root = document.getElementById('throughputList');
+  root.innerHTML = kpis.map(k => '<div class="tp-row"><b>' + k.profile + '</b><div class="tp-track"><div class="tp-fill" style="width:' + (k.throughput / max * 100) + '%"></div></div><div class="val num">' + fmt(k.throughput) + ' <span>req/s</span></div></div>').join('');
+  // Línea de referencia sobre toda la columna de barras
+  const ref = document.createElement('div'); ref.className = 'tp-ref';
+  root.appendChild(ref);
+  const place = () => {
+    const track = root.querySelector('.tp-track'), rb = root.getBoundingClientRect(), tb = track.getBoundingClientRect();
+    ref.style.left = (tb.left - rb.left + tb.width * thresholdPct / 100) + 'px';
+    ref.innerHTML = '<span>Referencia · 150 req/s</span>';
+  };
+  place(); window.addEventListener('resize', place);
+  const over = kpis.filter(k => k.throughput >= SLO.throughput).map(k => k.profile + ' (' + fmt(k.throughput) + ' req/s)');
+  document.getElementById('throughputNote').textContent = 'Sobre la referencia: ' + (over.join(', ') || 'ninguno') + ' · el think time de 1–3 s limita al resto, con 0 % de error.';
+}
+
+/* ---------- Series temporales con doble eje ---------- */
+function niceMax(v) { const p = Math.pow(10, Math.floor(Math.log10(v))); return Math.ceil(v / p * 1.1) * p; }
+function drawDualAxis(canvas, rows, opt) {
+  const dpr = window.devicePixelRatio || 1, rect = canvas.getBoundingClientRect();
+  canvas.width = Math.max(320, rect.width) * dpr; canvas.height = Math.max(200, rect.height) * dpr;
+  const ctx = canvas.getContext('2d'); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const w = canvas.width / dpr, h = canvas.height / dpr, p = { l: 54, r: 58, t: 24, b: 40 };
+  const iw = w - p.l - p.r, ih = h - p.t - p.b;
+  ctx.clearRect(0, 0, w, h);
+  const font = (s, wgt) => (wgt || 400) + ' ' + s + 'px ' + C.font;
+  const aMax = opt.a.max || niceMax(Math.max(...rows.map(r => r[opt.a.key])));
+  const bMax = opt.b.max || niceMax(Math.max(...rows.map(r => r[opt.b.key])));
+  const X = i => p.l + iw * i / (rows.length - 1 || 1);
+  const Y = (v, m) => p.t + ih * (1 - v / m);
+  // Rejilla y marcas de ejes
+  ctx.lineWidth = 1; ctx.font = font(10.5);
+  for (let i = 0; i <= 4; i++) {
+    const y = Math.round(p.t + ih * i / 4) + .5;
+    ctx.strokeStyle = i === 4 ? C.axis : C.grid; ctx.beginPath(); ctx.moveTo(p.l, y); ctx.lineTo(w - p.r, y); ctx.stroke();
+    ctx.fillStyle = C.muted; ctx.textAlign = 'right'; ctx.fillText(fmt(aMax * (4 - i) / 4, 0), p.l - 8, y + 3.5);
+    ctx.textAlign = 'left'; ctx.fillText(fmt(bMax * (4 - i) / 4, 0), w - p.r + 8, y + 3.5);
+  }
+  // Títulos de eje
+  ctx.fillStyle = C.muted; ctx.font = font(10.5, 500);
+  ctx.save(); ctx.textAlign = 'center'; ctx.translate(13, p.t + ih / 2); ctx.rotate(-Math.PI / 2); ctx.fillText(opt.a.label, 0, 0); ctx.restore();
+  ctx.save(); ctx.textAlign = 'center'; ctx.translate(w - 11, p.t + ih / 2); ctx.rotate(Math.PI / 2); ctx.fillText(opt.b.label, 0, 0); ctx.restore();
+  // Eje X
+  ctx.font = font(10.5); ctx.fillStyle = C.muted; ctx.textAlign = 'center';
+  const ticks = Math.min(5, rows.length);
+  for (let t = 0; t < ticks; t++) {
+    const i = Math.round((rows.length - 1) * t / (ticks - 1)), x = X(i);
+    ctx.strokeStyle = C.axis; ctx.beginPath(); ctx.moveTo(x + .5, h - p.b); ctx.lineTo(x + .5, h - p.b + 4); ctx.stroke();
+    ctx.fillText(rows[i].time, x, h - p.b + 15);
+  }
+  ctx.fillStyle = C.muted; ctx.font = font(10.5, 500); ctx.fillText('Hora', p.l + iw / 2, h - 6);
+  // Umbral horizontal (eje A)
+  if (opt.threshold) {
+    const y = Math.round(Y(opt.threshold.value, aMax)) + .5;
+    ctx.strokeStyle = C.red; ctx.lineWidth = 1.2; ctx.setLineDash([5, 4]); ctx.beginPath(); ctx.moveTo(p.l, y); ctx.lineTo(w - p.r, y); ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle = C.red; ctx.font = font(10.5, 500); ctx.textAlign = 'left'; ctx.fillText(opt.threshold.label, p.l + 8, y - 5);
+  }
+  // Anotaciones verticales (gris)
+  const labels = [];
+  (opt.annotations || []).forEach(a => {
+    const x = Math.round(X(a.index)) + .5;
+    ctx.strokeStyle = C.faint; ctx.lineWidth = 1; ctx.setLineDash([3, 3]); ctx.beginPath(); ctx.moveTo(x, p.t); ctx.lineTo(x, h - p.b); ctx.stroke(); ctx.setLineDash([]);
+    labels.push({ x, text: a.text });
+  });
+  // Series
+  const line = (key, max, color) => { ctx.strokeStyle = color; ctx.lineWidth = 2; ctx.lineJoin = 'round'; ctx.beginPath(); rows.forEach((r, i) => { const x = X(i), y = Y(r[key], max); i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }); ctx.stroke(); };
+  line(opt.b.key, bMax, opt.b.color); line(opt.a.key, aMax, opt.a.color);
+  // Etiquetas directas al final de cada serie (identidad sin depender solo del color)
+  const last = rows.length - 1, ends = [
+    { y: Y(rows[last][opt.a.key], aMax), text: opt.a.short, color: opt.a.color },
+    { y: Y(rows[last][opt.b.key], bMax), text: opt.b.short, color: opt.b.color }
+  ].sort((u, v) => u.y - v.y);
+  if (ends[0].y < p.t + 16) { const d = p.t + 16 - ends[0].y; ends.forEach(e => e.y += d); }
+  if (ends[1].y - ends[0].y < 16) { const m = (ends[0].y + ends[1].y) / 2; ends[0].y = m - 8; ends[1].y = m + 10; }
+  ctx.font = font(10.5, 600); ctx.textAlign = 'right';
+  ends.forEach(e => { const tw = ctx.measureText(e.text).width; ctx.fillStyle = '#FFFFFF'; ctx.fillRect(w - p.r - tw - 7, e.y - 15, tw + 6, 14); });
+  ends.forEach(e => { ctx.fillStyle = C.ink2; ctx.fillText(e.text, w - p.r - 4, e.y - 5); });
+  // Marcador de pico
+  if (opt.peak != null) {
+    const x = X(opt.peak), y = Y(rows[opt.peak][opt.a.key], aMax);
+    ctx.fillStyle = '#FFFFFF'; ctx.beginPath(); ctx.arc(x, y, 5, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = opt.a.color; ctx.beginPath(); ctx.arc(x, y, 3.5, 0, Math.PI * 2); ctx.fill();
+  }
+  // Etiquetas de anotación (arriba del área de trazado)
+  ctx.font = font(10.5, 500); ctx.fillStyle = C.muted;
+  labels.forEach((l, n) => {
+    const tw = ctx.measureText(l.text).width, right = l.x + 5 + tw < w - p.r;
+    ctx.textAlign = right ? 'left' : 'right';
+    ctx.fillText(l.text, right ? l.x + 5 : l.x - 5, p.t - 9 + (n % 2) * 12);
+  });
+}
+
+function resourceAnnotations(rows) {
+  const peak = rows.reduce((m, r, i) => r.cpu > rows[m].cpu ? i : m, 0);
+  let end = rows.findIndex((r, i) => i > peak && r.cpu === 0);
+  if (end < 0) end = rows.length - 1;
+  return { peak, end };
+}
+
+function updateResources() {
+  const mode = document.getElementById('resourceSelect').value, rows = resources[mode];
+  const { peak, end } = resourceAnnotations(rows);
+  const cpuMax = rows[peak].cpu, ramMax = Math.max(...rows.map(r => r.ram));
+  const logFile = mode === 'breakpoint' ? 'breakpoint_20260918_1139.log' : 'soak_20260918_1115.log';
+  document.getElementById('resourceTitle').textContent = (mode === 'breakpoint' ? 'Breakpoint' : 'Soak') + ' · docker stats · CPU en escala 0–100 % para mostrar el margen frente al umbral';
+  document.getElementById('resourceSource').textContent = 'Fuente · data/recursos_' + mode + '.csv ← load-testing/results/docker-stats/' + logFile;
+  document.getElementById('resourceStats').innerHTML =
+    '<div class="stat"><div class="k">CPU máx.</div><div class="v num">' + fmt(cpuMax) + ' <small>%</small></div></div>' +
+    '<div class="stat"><div class="k">RAM máx.</div><div class="v num">' + fmt(ramMax, 1) + ' <small>MiB</small></div></div>' +
+    '<div class="stat"><div class="k">RAM final</div><div class="v num">' + fmt(rows[rows.length - 1].ram, 1) + ' <small>MiB</small></div></div>' +
+    '<div class="stat"><div class="k">Umbral</div><div class="v num">' + fmt(SLO.cpu_ref, 0) + ' <small>% ref.</small></div></div>';
+  document.getElementById('resourceAnnotation').textContent =
+    'Anotaciones: inicio de carga a las ' + rows[0].time + '; pico de CPU de ' + fmt(cpuMax) + ' % a las ' + rows[peak].time +
+    '; fin de carga (CPU en 0 %) a las ' + rows[end].time + '. ' +
+    (mode === 'breakpoint' ? 'El retorno de la RAM hacia su nivel inicial no muestra evidencia de fuga durante la ventana observada.' : 'CPU y RAM estables durante 15 minutos: no se observan señales de fuga ni de saturación en la ventana medida.');
+  drawDualAxis(document.getElementById('resourceCanvas'), rows, {
+    a: { key: 'cpu', color: C.blue, label: 'CPU (%)', short: 'CPU', max: 100 },
+    b: { key: 'ram', color: C.violet, label: 'RAM (MiB)', short: 'RAM', max: 300 },
+    threshold: { value: SLO.cpu_ref, label: 'Umbral CPU 80 % (referencia, no SLO)' },
+    peak,
+    annotations: [
+      { index: 0, text: 'Inicio de carga' },
+      { index: peak, text: 'Pico CPU ' + fmt(cpuMax) + ' %' },
+      { index: end, text: 'Fin de carga' }
+    ]
+  });
+  const last = rows[rows.length - 1], first = rows[0];
+  document.getElementById('networkTag').textContent = 'Entrada ' + fmt(last.netIn - first.netIn, 1) + ' MB · Salida ' + fmt(last.netOut - first.netOut, 1) + ' MB';
+  document.getElementById('networkNote').textContent = 'Transferido en la corrida · acumulado final del contenedor: entrada ' + fmt(last.netIn, 1) + ' MB, salida ' + fmt(last.netOut, 1) + ' MB.';
+  document.getElementById('networkSource').textContent = 'Fuente · data/recursos_' + mode + '.csv ← load-testing/results/docker-stats/' + logFile;
+  drawDualAxis(document.getElementById('networkCanvas'), rows, {
+    a: { key: 'netIn', color: C.blue, label: 'Entrada (MB)', short: 'Entrada' },
+    b: { key: 'netOut', color: C.violet, label: 'Salida (MB)', short: 'Salida' },
+    annotations: [{ index: end, text: 'Fin de carga' }]
+  });
+}
+document.getElementById('resourceSelect').addEventListener('change', updateResources);
+window.addEventListener('resize', () => { clearTimeout(window.__rt); window.__rt = setTimeout(updateResources, 120); });
+
+/* ---------- Block I/O ---------- */
+function renderIo() {
+  const rows = resources.soak, active = rows.filter(r => r.cpu > 0), a = active[0], b = active[active.length - 1];
+  const st = (x, y) => x === y ? badge('b-neutral', 'Estable') : badge('b-neutral', 'Cambió');
+  const tr = (m, x, y, u, d, s) => '<tr><td>' + m + '</td><td class="num">' + fmt(x, d) + ' ' + u + '</td><td class="num">' + fmt(y, d) + ' ' + u + '</td><td class="r">' + s + '</td></tr>';
+  const dRam = b.ram - a.ram;
+  document.getElementById('ioTable').innerHTML =
+    tr('Block read', a.blockRead, b.blockRead, 'MB', 1, st(a.blockRead, b.blockRead)) +
+    tr('Block write', a.blockWrite, b.blockWrite, 'MB', 4, st(a.blockWrite, b.blockWrite)) +
+    tr('RAM', a.ram, b.ram, 'MiB', 1, '<span class="delta num">' + (dRam >= 0 ? '+' : '') + fmt(dRam, 1) + ' MiB</span>');
+}
+
+/* ---------- Footer ---------- */
+document.getElementById('footer').innerHTML =
+  '<div><b>Restful-Booker · Dashboard de rendimiento · Actividad 4</b><br>Fuente: k6 + docker stats · Datos consolidados desde CSV · Generado el ' + D.generatedAt + ' con scripts/build_dashboard_data.py</div>' +
+  '<div style="text-align:right">Dashboard local HTML/JavaScript en un solo archivo, sin servidor ni dependencias externas.<br>Complementa la Actividad 3; no modifica resultados.</div>';
+
+renderLatency(); renderSlo(); renderThroughput(); renderIo(); updateCards(); updateResources();
+</script>
+</body>
+</html>
