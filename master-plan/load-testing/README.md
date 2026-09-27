@@ -101,7 +101,25 @@ PROFILE=load k6 run scripts/load_test.js --out csv=results/load_$(date +%Y%m%d_%
 - [x] `report/informe_tecnico.md` completado: percentiles P50/P95/P99, throughput, errores, contraste con SLO, cuellos de botella y propuestas priorizadas
 - [x] Todo integrado a `main` mediante el PR #4
 
-## 6. Estructura
+## 6. Actividad 4 — Dashboard de rendimiento
+
+La evidencia de esta carpeta (`results/*_summary.json`, `results/*_console.log` y
+`results/docker-stats/*.log`) alimenta el dashboard de KPIs de la Actividad 4, ubicado en
+[`../actividad-4-dashboard/`](../actividad-4-dashboard/).
+
+Para levantarlo:
+
+```bash
+cd master-plan/actividad-4-dashboard
+python3 scripts/build_dashboard_data.py   # opcional: regenera los datos desde data/*.csv
+open dashboard/index.html                 # o ábrelo manualmente en el navegador
+```
+
+Es un archivo HTML único, sin servidor ni dependencias: los datos ya están incluidos. Ver el
+[README de la Actividad 4](../actividad-4-dashboard/README.md) para el detalle de paneles,
+umbrales (SLO) y la trazabilidad de cada cifra hacia el archivo de origen en esta carpeta.
+
+## 7. Estructura
 
 ```
 master-plan/load-testing/
@@ -112,5 +130,4 @@ master-plan/load-testing/
 │   └── environment.md           ← entorno, perfil de carga y supuestos (SLA/SLO)
 ├── results/                     ← resultados crudos (JSON/CSV) y reportes HTML (no versionar corridas grandes)
 └── report/
-    └── informe_tecnico.md       ← informe técnico ~800 palabras
-```
+
