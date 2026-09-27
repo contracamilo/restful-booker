@@ -96,11 +96,13 @@ PROFILE=load k6 run scripts/load_test.js --out csv=results/load_$(date +%Y%m%d_%
 ## 5. Checklist de entrega (mapea directo a los criterios de evaluación)
 
 - [x] `config/environment.md` completado (hardware real, perfiles, SLI/SLO/SLA aclarados)
-- [x] Corridas de los 4 perfiles (`load`, `stress`, `spike`, `soak`) con resultados en `results/`
-- [x] Reporte HTML del dashboard (`results/spike_*_report.html`) + `docker stats` durante `soak`
+- [x] Corridas de los 5 perfiles (`load`, `stress`, `spike`, `soak`, `breakpoint`) con resultados en `results/`
+- [x] Reporte HTML del dashboard (`results/spike_*_report.html`) + `docker stats` durante `soak` y `breakpoint`
 - [x] `report/informe_tecnico.md` completado (~974 palabras): percentiles P50/P95/P99, throughput,
       errores, contraste con SLO, cuellos de botella y propuestas priorizadas
 - [ ] Todo commiteado en esta rama (`feature/actividad-3-load-testing`) y PR abierto
+- [x] `report/informe_tecnico.md` completado: percentiles P50/P95/P99, throughput, errores, contraste con SLO, cuellos de botella y propuestas priorizadas
+- [x] Todo integrado a `main` mediante el PR #4
 
 ## 6. Estructura
 
@@ -113,12 +115,4 @@ master-plan/load-testing/
 │   └── environment.md           ← entorno, perfil de carga y supuestos (SLA/SLO)
 ├── results/                     ← resultados crudos (JSON/CSV) y reportes HTML (no versionar corridas grandes)
 └── report/
-    └── informe_tecnico.md       ← informe técnico ~800 palabras (completar después de ejecutar)
-```
 
-## Nota de equipo
-
-Por tiempo, Camilo hace esta actividad solo (con ayuda de Claude), cubriendo los 3 roles que
-propone el material del curso (Modelador/Scripter/Analista) en vez de repartirlos entre los tres.
-Karen y Richard: si alcanzan a aportar algo (una corrida en su máquina, revisar el informe antes de
-entregar), bienvenido, pero el plan no depende de eso para llegar a tiempo al 20 de septiembre.
